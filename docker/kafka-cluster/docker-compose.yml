@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  zookeeper:
+    image: bitnami/zookeeper:3.9.1
+    tmpfs: "/zktmp"
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: 'yes'
+    ports:
+      - "2181:2181"
+
+  kafka1:
+    image: bitnami/kafka:3.7.0
+    depends_on:
+      - zookeeper
+    env_file:
+      - .env
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    volumes:
+      - kafka_data1:/bitnami/kafka
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      - kafka1
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+
+volumes:
+  kafka_data1:
+    driver: local

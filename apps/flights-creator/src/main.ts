@@ -1,21 +1,26 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
-
 import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
-import { AppModule } from './app/app.module'
+import { CoreModule } from './core/core.module'
+import { MicroserviceOptions, Transport } from '@nestjs/microservices'
+import { v4 } from 'uuid'
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule)
-    const globalPrefix = 'api'
-    app.setGlobalPrefix(globalPrefix)
-    const port = process.env.PORT || 3000
-    await app.listen(port)
-    Logger.log(
-        `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
+    const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+        CoreModule,
+        {
+            transport: Transport.KAFKA,
+            options: {
+                client: {
+                    clientId: `flights-creator-client-${v4()}`,
+                    brokers: ['localhost:29092']
+                },
+                consumer: {
+                    groupId: 'flights-creator-consumer-group'
+                }
+            }
+        }
     )
+    app.listen().then(() => Logger.log(`🚀 Flights-Creator is started...`))
 }
 
 bootstrap()
