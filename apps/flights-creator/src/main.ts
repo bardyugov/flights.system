@@ -4,13 +4,9 @@ import { CoreModule } from './core/core.module'
 
 async function bootstrap() {
     const app = await NestFactory.create(CoreModule)
-    const port = process.env.PORT
-    if (!port) {
-        throw new Error('Port is required')
-    }
-    app.listen(process.env.PORT).then(() =>
-        Logger.log(`🚀 Flights-Creator is started...`)
-    )
+    const PORT = process.env.PORT || 5555
+
+    app.listen(PORT).then(() => Logger.log(`🚀 Flights-Creator is started...`))
 }
 
 bootstrap()

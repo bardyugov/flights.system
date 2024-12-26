@@ -1,4 +1,4 @@
-import { IConsumerService } from '../../../common/services/consumer/consumer.inteface'
+import { IConsumerService } from '../../../application/services/consumer/consumer.inteface'
 import { Consumer, Kafka, LogEntry, logLevel } from 'kafkajs'
 import { Injectable, Logger, Provider } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -9,53 +9,85 @@ class ConsumerService implements IConsumerService {
     private readonly consumer: Consumer
     private readonly kafka: Kafka
     private readonly logger = new Logger()
+    private readonly topics: string[] = []
 
     constructor(private readonly config: ConfigService) {
         this.kafka = new Kafka({
             clientId: this.config.get<string>('CLIENT_ID'),
-            brokers: [this.config.get<string>('BROKER')],
+            brokers: this.parseArrayFromConfig('BROKERS'),
             connectionTimeout: 10000,
-            logCreator: this.initLogger
+            logCreator: level => this.initLogger(level, this.logger)
         })
+        this.topics = this.parseArrayFromConfig('TOPICS')
+
         this.consumer = this.kafka.consumer({
             groupId: this.config.get<string>('CONSUMER_GROUP_ID')
         })
     }
 
-    private initLogger(level: logLevel): (entry: LogEntry) => void {
+    private parseArrayFromConfig(key: string) {
+        return this.config
+            .get<string>(key)
+            .split(';')
+            .map(t => t.trim())
+    }
+
+    private buildKafkaLog(entry: LogEntry) {
+        return JSON.stringify({
+            level: entry.level,
+            label: entry.label,
+            message: entry.log.message
+        })
+    }
+
+    private initLogger(
+        level: logLevel,
+        logger: Logger
+    ): (entry: LogEntry) => void {
         return entry => {
+            const serviceName = ConsumerService.name
             switch (level) {
                 case logLevel.ERROR:
-                    this.logger.error(entry)
+                    logger.error(this.buildKafkaLog(entry), serviceName)
                     break
                 case logLevel.NOTHING:
-                    this.logger.log(entry)
+                    logger.log(this.buildKafkaLog(entry), serviceName)
                     break
                 case logLevel.WARN:
-                    this.logger.warn(entry)
+                    logger.warn(this.buildKafkaLog(entry), serviceName)
                     break
                 case logLevel.INFO:
-                    this.logger.log(entry)
+                    logger.log(this.buildKafkaLog(entry), serviceName)
                     break
                 case logLevel.DEBUG:
-                    this.logger.debug(entry)
+                    logger.debug(this.buildKafkaLog(entry), serviceName)
                     break
             }
         }
     }
 
     private async createTopics() {
+        const numPartitions = this.config.get<number>('COUNT_PARTITIONS')
+        const replicationFactor = this.config.get<number>('REPLICATION_FACTOR')
         const admin = this.kafka.admin()
 
-        const topics = await admin.listTopics()
-
-        console.log(topics)
+        await admin.createTopics({
+            topics: this.topics.map(topic => ({
+                topic,
+                numPartitions,
+                replicationFactor
+            }))
+        })
     }
 
     async connect(): Promise<void> {
         await this.createTopics()
         await this.consumer.connect()
-        await this.consumer.subscribe({ topics: ['hello'] })
+
+        await this.consumer.subscribe({
+            topics: this.topics,
+            fromBeginning: true
+        })
     }
 
     async subscribe<T>(
@@ -63,10 +95,7 @@ class ConsumerService implements IConsumerService {
         callback: (message: T) => void
     ): Promise<void> {
         await this.consumer.run({
-            eachMessage: async data => {
-                this.logger.log('Topic', data.topic)
-                this.logger.log('Message', data.message)
-            }
+            eachMessage: async data => {}
         })
     }
 
