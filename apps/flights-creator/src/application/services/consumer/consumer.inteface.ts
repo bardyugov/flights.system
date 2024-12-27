@@ -1,6 +1,11 @@
+import { EachMessagePayload } from 'kafkajs'
+
 interface IConsumerService {
     connect(): Promise<void>
-    subscribe<T>(topic: string, callback: (message: T) => void): Promise<void>
+    subscribe(
+        topic: string,
+        callback: (message: EachMessagePayload) => Promise<void>
+    ): Promise<void>
     disconnect(): Promise<void>
 }
 

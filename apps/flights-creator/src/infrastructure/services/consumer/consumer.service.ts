@@ -1,12 +1,20 @@
 import { IConsumerService } from '../../../application/services/consumer/consumer.inteface'
-import { Consumer, Kafka, LogEntry, logLevel } from 'kafkajs'
+import {
+    Consumer,
+    EachMessagePayload,
+    Kafka,
+    LogEntry,
+    logLevel
+} from 'kafkajs'
 import { Injectable, Logger, Provider } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { InjectServices } from '../../utils/constants'
+import { InjectServices } from '@flights.system/shared'
+import { ConsumerException } from '../../common/exceptions/consumer.exception'
 
 @Injectable()
 class ConsumerService implements IConsumerService {
-    private readonly consumer: Consumer
+    private readonly serviceName = ConsumerService.name
+    private readonly consumers = new Map<string, Consumer>()
     private readonly kafka: Kafka
     private readonly logger = new Logger()
     private readonly topics: string[] = []
@@ -19,10 +27,6 @@ class ConsumerService implements IConsumerService {
             logCreator: level => this.initLogger(level, this.logger)
         })
         this.topics = this.parseArrayFromConfig('TOPICS')
-
-        this.consumer = this.kafka.consumer({
-            groupId: this.config.get<string>('CONSUMER_GROUP_ID')
-        })
     }
 
     private parseArrayFromConfig(key: string) {
@@ -45,28 +49,27 @@ class ConsumerService implements IConsumerService {
         logger: Logger
     ): (entry: LogEntry) => void {
         return entry => {
-            const serviceName = ConsumerService.name
             switch (level) {
                 case logLevel.ERROR:
-                    logger.error(this.buildKafkaLog(entry), serviceName)
+                    logger.error(this.buildKafkaLog(entry), this.serviceName)
                     break
                 case logLevel.NOTHING:
-                    logger.log(this.buildKafkaLog(entry), serviceName)
+                    logger.log(this.buildKafkaLog(entry), this.serviceName)
                     break
                 case logLevel.WARN:
-                    logger.warn(this.buildKafkaLog(entry), serviceName)
+                    logger.warn(this.buildKafkaLog(entry), this.serviceName)
                     break
                 case logLevel.INFO:
-                    logger.log(this.buildKafkaLog(entry), serviceName)
+                    logger.log(this.buildKafkaLog(entry), this.serviceName)
                     break
                 case logLevel.DEBUG:
-                    logger.debug(this.buildKafkaLog(entry), serviceName)
+                    logger.debug(this.buildKafkaLog(entry), this.serviceName)
                     break
             }
         }
     }
 
-    private async createTopics() {
+    async connect(): Promise<void> {
         const numPartitions = this.config.get<number>('COUNT_PARTITIONS')
         const replicationFactor = this.config.get<number>('REPLICATION_FACTOR')
         const admin = this.kafka.admin()
@@ -78,34 +81,48 @@ class ConsumerService implements IConsumerService {
                 replicationFactor
             }))
         })
+
+        this.logger.log('Success created topic', this.serviceName)
     }
 
-    async connect(): Promise<void> {
-        await this.createTopics()
-        await this.consumer.connect()
-
-        await this.consumer.subscribe({
-            topics: this.topics,
-            fromBeginning: true
-        })
+    private async buildReplyProducer(topic: string) {
+        const replyTopic = `${topic}.reply`
+        const producer = this.kafka.producer()
+        return producer
     }
 
-    async subscribe<T>(
+    async subscribe(
         topic: string,
-        callback: (message: T) => void
+        callback: (message: EachMessagePayload) => Promise<void>
     ): Promise<void> {
-        await this.consumer.run({
-            eachMessage: async data => {}
+        const foundedConsumer = this.consumers.get(topic)
+        if (foundedConsumer) {
+            throw new ConsumerException(
+                `Consumer with topic name - ${topic} already exist}`
+            )
+        }
+
+        const consumer = this.kafka.consumer({
+            groupId: this.config.get<string>('CONSUMER_GROUP_ID')
         })
+        await consumer.subscribe({ topic, fromBeginning: true })
+
+        await consumer.run({
+            eachMessage: callback
+        })
+        this.consumers.set(topic, consumer)
+        this.logger.log('Success created consumer', this.serviceName)
     }
 
     async disconnect(): Promise<void> {
-        await this.consumer.disconnect()
+        for (const consumer of this.consumers.values()) {
+            await consumer.disconnect()
+        }
     }
 }
 
 const ConsumerServiceProvider: Provider = {
-    provide: InjectServices.IConsumerService,
+    provide: InjectServices.ConsumerService,
     useClass: ConsumerService
 }
 
