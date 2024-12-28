@@ -1,14 +1,16 @@
 import {
     Controller,
     Inject,
+    Logger,
     OnModuleDestroy,
     OnModuleInit
 } from '@nestjs/common'
 import { InjectServices } from '@flights.system/shared'
-import { IConsumerService } from '../../../application/services/consumer/consumer.inteface'
+import { IConsumerService } from '@flights.system/shared'
 
-@Controller('')
+@Controller()
 class HelloHandler implements OnModuleInit, OnModuleDestroy {
+    private readonly logger = new Logger()
     constructor(
         @Inject(InjectServices.ConsumerService)
         private readonly consumerService: IConsumerService
@@ -17,9 +19,13 @@ class HelloHandler implements OnModuleInit, OnModuleDestroy {
     async onModuleInit() {
         await this.consumerService.connect()
 
-        await this.consumerService.subscribe('city.topic', async payload => {
-            console.log(payload.message.value.toString())
-        })
+        await this.consumerService.subscribeWithReply(
+            'city.topic',
+            async value => {
+                this.logger.log(`Received ${value.message.value.toString()}`)
+                return 'Hello from consumer'
+            }
+        )
     }
 
     async onModuleDestroy() {
