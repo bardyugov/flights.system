@@ -6,46 +6,38 @@ import {
     Post
 } from '@nestjs/common'
 import {
-    IConsumerService,
+    AirplaneCreateReq,
+    CityCreateReq,
+    CityCreateRes,
     InjectServices,
-    IProducerService
+    IProducerService,
+    Topic
 } from '@flights.system/shared'
-import { Observable, Subject } from 'rxjs'
 
 @Controller('/city')
 class CityHandler implements OnModuleInit, OnModuleDestroy {
-    private readonly subject = new Subject<string>()
     constructor(
         @Inject(InjectServices.ProducerService)
-        private readonly producer: IProducerService,
-        @Inject(InjectServices.ConsumerService)
-        private readonly consumer: IConsumerService
+        private readonly producer: IProducerService
     ) {}
 
-    async sendMessageWithReply() {
-        await this.producer.produce('city.topic', {
-            message: 'Hello from producer'
-        })
-    }
-
-    @Post('/send')
+    @Post('/create')
     async send() {
-        await this.sendMessageWithReply()
-        return new Promise(res => {
-            this.subject.subscribe(res)
+        const subject = await this.producer.produceWithReply<
+            CityCreateReq,
+            CityCreateRes
+        >(Topic.CITY_TOPIC, {
+            name: 'New city'
         })
+        return new Promise(res => subject.subscribe(res))
     }
 
     async onModuleInit() {
-        await this.consumer.connect()
-        await this.consumer.send('city.topic.reply', async payload => {
-            this.subject.next(payload.message.value.toString())
-        })
+        await this.producer.subscribeOfReply(Topic.CITY_TOPIC_REPLY)
     }
 
     async onModuleDestroy() {
         await this.producer.disconnect()
-        await this.consumer.disconnect()
     }
 }
 

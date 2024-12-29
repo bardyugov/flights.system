@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
-import { HelloHandler } from './hello.handler'
+import { CityHandler } from './city.handler'
 import { ConsumerModule } from '@flights.system/shared'
 
 @Module({
-    controllers: [HelloHandler],
+    controllers: [CityHandler],
     imports: [ConsumerModule]
 })
 class HelloModule {}
