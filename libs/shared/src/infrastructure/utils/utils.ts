@@ -6,6 +6,10 @@ enum InjectServices {
     ProducerService = 'ProducerService'
 }
 
+/*type KafkaMessagePayload<T extends object> = {
+    value: T
+}*/
+
 function parseArrayFromConfig(value: string) {
     if (value === '' || !value) {
         return []
@@ -21,30 +25,49 @@ function buildKafkaLogMessage(entry: LogEntry) {
     })
 }
 
+function buildReplyTopic(topic: string) {
+    return `${topic}.reply`
+}
+
+function safelyParseBuffer<T>(buffer: Buffer) {
+    try {
+        const stringBuffer = buffer.toString()
+        const value: T = JSON.parse(stringBuffer)
+        return value
+    } catch (e) {
+        return null
+    }
+}
+
 function initKafkaLogger(
     level: logLevel,
-    logger: Logger,
-    serviceName: string
+    logger: Logger
 ): (entry: LogEntry) => void {
     return entry => {
         switch (level) {
             case logLevel.ERROR:
-                logger.error(buildKafkaLogMessage(entry), serviceName)
+                logger.error(buildKafkaLogMessage(entry))
                 break
             case logLevel.NOTHING:
-                logger.log(buildKafkaLogMessage(entry), serviceName)
+                logger.log(buildKafkaLogMessage(entry))
                 break
             case logLevel.WARN:
-                logger.warn(buildKafkaLogMessage(entry), serviceName)
+                logger.warn(buildKafkaLogMessage(entry))
                 break
             case logLevel.INFO:
-                logger.log(buildKafkaLogMessage(entry), serviceName)
+                logger.log(buildKafkaLogMessage(entry))
                 break
             case logLevel.DEBUG:
-                logger.debug(buildKafkaLogMessage(entry), serviceName)
+                logger.debug(buildKafkaLogMessage(entry))
                 break
         }
     }
 }
 
-export { InjectServices, parseArrayFromConfig, initKafkaLogger }
+export {
+    InjectServices,
+    parseArrayFromConfig,
+    initKafkaLogger,
+    buildReplyTopic,
+    safelyParseBuffer
+}
