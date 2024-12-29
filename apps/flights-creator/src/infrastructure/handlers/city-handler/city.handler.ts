@@ -6,11 +6,11 @@ import {
     OnModuleInit
 } from '@nestjs/common'
 import {
-    InjectServices,
-    IConsumerService,
+    AirplaneCreateReq,
     CityCreateReq,
     CityCreateRes,
-    AirplaneCreateReq,
+    IConsumerService,
+    InjectServices,
     Topic
 } from '@flights.system/shared'
 
@@ -28,9 +28,20 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
         await this.consumerService.subscribe<AirplaneCreateReq>(
             Topic.AIRPLANE_TOPIC,
             async msg => {
-                this.logger.log(`Recieved PID: ${msg.PID}`)
+                this.logger.debug(`Received msg ${JSON.stringify(msg)}`)
             }
         )
+
+        await this.consumerService.subscribeWithReply<
+            CityCreateReq,
+            CityCreateRes
+        >(Topic.CITY_TOPIC, async msg => {
+            this.logger.debug(`Received msg ${JSON.stringify(msg)}`)
+            return {
+                id: 'new id',
+                name: msg.name
+            }
+        })
     }
 
     async onModuleDestroy() {

@@ -8,7 +8,6 @@ import {
 import {
     AirplaneCreateReq,
     CityCreateReq,
-    CityCreateRes,
     InjectServices,
     IProducerService,
     Topic
@@ -22,14 +21,22 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
     ) {}
 
     @Post('/create')
-    async send() {
+    async createCity() {
         const subject = await this.producer.produceWithReply<
             CityCreateReq,
-            CityCreateRes
+            CityCreateReq
         >(Topic.CITY_TOPIC, {
             name: 'New city'
         })
         return new Promise(res => subject.subscribe(res))
+    }
+
+    @Post('airplane/create')
+    async create() {
+        await this.producer.produce<AirplaneCreateReq>(Topic.AIRPLANE_TOPIC, {
+            PID: '321',
+            name: 'Kirill'
+        })
     }
 
     async onModuleInit() {

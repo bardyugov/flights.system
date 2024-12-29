@@ -25,6 +25,7 @@ class ConsumerService implements IConsumerService {
     private readonly kafka: Kafka
     private readonly logger = new Logger(ConsumerService.name)
     private readonly topics: string[] = Object.values(Topic)
+    private readonly consumerGroupId: string
 
     constructor(
         @Inject(forwardRef(() => InjectServices.ProducerService))
@@ -32,15 +33,21 @@ class ConsumerService implements IConsumerService {
         private readonly config: ConfigService
     ) {
         this.kafka = new Kafka({
-            clientId: 'CLIENT_ID',
+            clientId: this.config.get<string>('CLIENT_ID'),
             brokers: parseArrayFromConfig(this.config.get<string>('BROKERS')),
             logCreator: level => initKafkaLogger(level, this.logger)
         })
+        this.consumerGroupId = this.config.get('CONSUMER_GROUP_ID')
+    }
+
+    private buildUniqueConsumerGroup(topic: string) {
+        return `${topic}.consumer.group`
     }
 
     async connect(): Promise<void> {
         const numPartitions = this.config.get<number>('COUNT_PARTITIONS')
         const replicationFactor = this.config.get<number>('REPLICATION_FACTOR')
+
         const admin = this.kafka.admin()
         await admin.createTopics({
             topics: this.topics.map(topic => ({
@@ -58,8 +65,13 @@ class ConsumerService implements IConsumerService {
         callback: (message: Req) => Promise<unknown>
     ): Promise<void> {
         const foundedConsumer = this.consumers.get(topic)
+        if (foundedConsumer) {
+            return this.logger.log(
+                'Consumer already exist and subscribe to topic'
+            )
+        }
         const consumer = this.kafka.consumer({
-            groupId: this.config.get<string>('CONSUMER_GROUP_ID')
+            groupId: this.buildUniqueConsumerGroup(topic)
         })
 
         await consumer.subscribe({ topic, fromBeginning: true })
@@ -75,10 +87,11 @@ class ConsumerService implements IConsumerService {
             }
         })
 
-        if (!foundedConsumer) {
-            this.logger.log('Success created consumer')
-            this.consumers.set(topic, consumer)
-        }
+        this.logger.log(
+            `Success created consumer with topic: ${topic} and consumerGroupId: ${this.consumerGroupId}`
+        )
+        this.consumers.set(topic, consumer)
+
         this.logger.log('Success subscribing')
     }
 
@@ -87,15 +100,20 @@ class ConsumerService implements IConsumerService {
         callback: (message: Req) => Promise<Res>
     ): Promise<void> {
         const foundedConsumer = this.consumers.get(topic)
+        if (foundedConsumer) {
+            return this.logger.log(
+                'Consumer already exist and subscribe to topic'
+            )
+        }
+
         const consumer = this.kafka.consumer({
-            groupId: this.config.get<string>('CONSUMER_GROUP_ID')
+            groupId: this.buildUniqueConsumerGroup(topic)
         })
         await consumer.subscribe({ topic, fromBeginning: true })
 
         await consumer.run({
             eachMessage: async payload => {
                 const data = safelyParseBuffer<Req>(payload.message.value)
-                console.log('Data', JSON.stringify(data))
                 if (!data) {
                     throw new NotParsedBuffer('Not parsed message')
                 }
@@ -106,10 +124,11 @@ class ConsumerService implements IConsumerService {
             }
         })
 
-        if (!foundedConsumer) {
-            this.logger.log('Success created consumer')
-            this.consumers.set(topic, consumer)
-        }
+        this.logger.log(
+            `Success created consumer with topic: ${topic} and consumerGroupId: ${this.consumerGroupId}`
+        )
+        this.consumers.set(topic, consumer)
+
         this.logger.log('Success subscribing')
     }
 
