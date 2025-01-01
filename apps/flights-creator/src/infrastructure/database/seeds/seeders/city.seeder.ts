@@ -9,8 +9,7 @@ class CitySeeder implements Seeder {
         factoryManager: SeederFactoryManager
     ): Promise<void> {
         const factory = await factoryManager.get(CityEntity)
-        console.log('Working')
-        await factory.saveMany(100)
+        await factory.saveMany(20 * 1000)
     }
 }
 
