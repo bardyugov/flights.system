@@ -33,6 +33,27 @@
                     "buildTarget": "flights-creator:build:production"
                 }
             }
+        },
+        "migration:generate": {
+          "executor": "nx:run-commands",
+          "options": {
+            "command": "ts-node --project tsconfig.app.json ../../node_modules/typeorm/cli migration:generate ./src/infrastructure/database/migrations/{args.name} -d ./src/infrastructure/database/database.context.ts",
+            "cwd": "apps/flights-creator"
+          }
+        },
+      "migration:apply": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "ts-node --project tsconfig.app.json ../../node_modules/typeorm/cli migration:run -d ./src/infrastructure/database/database.context.ts",
+          "cwd": "apps/flights-creator"
         }
+      },
+      "seeds:run": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "ts-node --project tsconfig.app.json ../../node_modules/typeorm-extension/bin/cli.cjs seed:run -d ./src/infrastructure/database/seeds/seeds.config.ts",
+          "cwd": "apps/flights-creator"
+        }
+      }
     }
 }

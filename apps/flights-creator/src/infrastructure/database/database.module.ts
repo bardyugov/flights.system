@@ -14,8 +14,8 @@ import { ConfigService } from '@nestjs/config'
                 password: config.get<string>('POSTGRES_PASSWORD'),
                 database: config.get<string>('POSTGRES_DB'),
                 synchronize: false,
-                entities: ['../entities/*.entity.ts'],
-                migrations: ['./migrations']
+                entities: ['./src/infrastructure/entities/*.entity.ts'],
+                migrations: ['./src/infrastructure/database/migrations/*.ts']
             })
         })
     ]
