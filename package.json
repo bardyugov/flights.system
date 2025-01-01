@@ -2,11 +2,7 @@
   "name": "@flights.system/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {
-    "flights:creator:migrate": "npx dotenv -e ./apps/flights-creator/src/assets/.development.env -- npx prisma migrate dev --schema ./apps/flights-creator/src/infrastructure/database/prisma/schema.prisma",
-    "flights:creator:push": "npx dotenv -e ./apps/flights-creator/src/assets/.development.env -- npx prisma db push --schema ./apps/flights-creator/src/infrastructure/database/prisma/schema.prisma",
-    "flights:creator:generate": "npx prisma generate --schema ./apps/flights-creator/src/infrastructure/database/prisma/schema.prisma"
-  },
+  "scripts": {},
   "private": true,
   "dependencies": {
     "@nestjs/common": "^10.0.2",
@@ -15,12 +11,15 @@
     "@nestjs/microservices": "^10.4.15",
     "@nestjs/platform-express": "^10.0.2",
     "@nestjs/swagger": "^8.1.0",
-    "@prisma/client": "^6.1.0",
+    "@nestjs/typeorm": "^10.0.2",
     "axios": "^1.6.0",
     "dotenv": "^16.4.7",
     "kafkajs": "^2.2.4",
+    "pg": "^8.13.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
+    "typeorm": "^0.3.20",
+    "typeorm-extension": "^3.6.3",
     "uuidv4": "^6.2.13"
   },
   "devDependencies": {
