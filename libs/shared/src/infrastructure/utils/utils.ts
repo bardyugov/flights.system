@@ -6,10 +6,6 @@ enum InjectServices {
     ProducerService = 'ProducerService'
 }
 
-/*type KafkaMessagePayload<T extends object> = {
-    value: T
-}*/
-
 function parseArrayFromConfig(value: string) {
     if (value === '' || !value) {
         return []
