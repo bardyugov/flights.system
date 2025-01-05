@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import path from 'path'
 import { HelloModule } from '../infrastructure/handlers/city-handler/city.module'
+import { AccumulatorModule } from '../infrastructure/services/accumulator/accumulator.module'
 
 @Module({
     imports: [
@@ -12,7 +13,8 @@ import { HelloModule } from '../infrastructure/handlers/city-handler/city.module
                 `./assets/.${process.env.NODE_ENV}.env`
             )
         }),
-        HelloModule
+        HelloModule,
+        AccumulatorModule
     ]
 })
 class CoreModule {}

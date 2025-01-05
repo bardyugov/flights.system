@@ -5,7 +5,7 @@ import { FlightEntity } from '../../../entities/flight.entity'
 import { FlightInsertQuery } from '../../query-types'
 import { maxCountWritten } from '../../constants'
 
-class FlightSeder implements Seeder {
+class FlightSeeder implements Seeder {
     track?: boolean
     async run(dataSource: DataSource): Promise<void> {
         const faker = new Faker({ locale: [es] })
@@ -37,4 +37,4 @@ class FlightSeder implements Seeder {
     }
 }
 
-export default FlightSeder
+export { FlightSeeder }

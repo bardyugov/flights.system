@@ -51,6 +51,13 @@
       "seeds:run": {
         "executor": "nx:run-commands",
         "options": {
+          "command": "ts-node --project tsconfig.app.json ./src/infrastructure/database/seeds/runner.ts",
+          "cwd": "apps/flights-creator"
+        }
+      },
+      "seed:run": {
+        "executor": "nx:run-commands",
+        "options": {
           "command": "ts-node --project tsconfig.app.json ../../node_modules/typeorm-extension/bin/cli.cjs seed:run -d ./src/infrastructure/database/database.context.ts",
           "cwd": "apps/flights-creator"
         }

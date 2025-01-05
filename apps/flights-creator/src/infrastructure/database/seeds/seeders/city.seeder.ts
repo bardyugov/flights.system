@@ -14,4 +14,4 @@ class CitySeeder implements Seeder {
     }
 }
 
-export default CitySeeder
+export { CitySeeder }

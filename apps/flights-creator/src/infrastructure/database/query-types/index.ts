@@ -5,11 +5,11 @@ type FlightInsertQuery = {
     to: () => string
 }
 
-type AirplaineInsertQuery = {
+type AirplaneInsertQuery = {
     pid: number
     amountPlaces: number
-    statusId: number
-    currentCityId: number
+    status: () => string
+    currentCity: () => string
 }
 
-export { FlightInsertQuery, AirplaineInsertQuery }
+export { FlightInsertQuery, AirplaneInsertQuery }
