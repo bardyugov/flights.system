@@ -9,7 +9,7 @@ class CitySeeder implements Seeder {
         dataSource: DataSource,
         factoryManager: SeederFactoryManager
     ): Promise<void> {
-        const factory = await factoryManager.get(CityEntity)
+        const factory = factoryManager.get(CityEntity)
         await factory.saveMany(maxCountWritten)
     }
 }
