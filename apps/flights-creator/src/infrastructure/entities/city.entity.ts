@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
 import { FlightEntity } from './flight.entity'
+import { AirplaneEntity } from './airplane.entity'
 
 @Entity({ name: 'city' })
 class CityEntity {
@@ -25,6 +26,9 @@ class CityEntity {
 
     @OneToMany(() => FlightEntity, flight => flight.to)
     flightsTo: FlightEntity[]
+
+    @OneToMany(() => AirplaneEntity, airplane => airplane.currentCity)
+    airplanes: AirplaneEntity[]
 
     constructor(name: string, country: string) {
         this.name = name

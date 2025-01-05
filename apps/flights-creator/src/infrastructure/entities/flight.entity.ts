@@ -1,4 +1,10 @@
-import { PrimaryGeneratedColumn, Column, ManyToOne, Entity } from 'typeorm'
+import {
+    PrimaryGeneratedColumn,
+    Column,
+    ManyToOne,
+    Entity,
+    JoinColumn
+} from 'typeorm'
 import { CityEntity } from './city.entity'
 
 @Entity('flight')
@@ -9,10 +15,18 @@ class FlightEntity {
     @ManyToOne(() => CityEntity, city => city.flightsFrom, {
         nullable: false
     })
+    @JoinColumn({
+        name: 'from_city_id',
+        referencedColumnName: 'id'
+    })
     from: CityEntity
 
-    @ManyToOne(() => CityEntity, city => city.flightsTo, {
+    @ManyToOne(() => CityEntity, city => city.flightsFrom, {
         nullable: false
+    })
+    @JoinColumn({
+        name: 'to_city_id',
+        referencedColumnName: 'id'
     })
     to: CityEntity
 
@@ -29,6 +43,18 @@ class FlightEntity {
 
     @Column({ name: 'departure_time', type: 'timestamp', nullable: false })
     departureTime: Date
+
+    constructor(
+        from: CityEntity,
+        to: CityEntity,
+        landingTime: Date,
+        departureTime: Date
+    ) {
+        this.from = from
+        this.to = to
+        this.landingTime = landingTime
+        this.departureTime = departureTime
+    }
 }
 
 export { FlightEntity }
