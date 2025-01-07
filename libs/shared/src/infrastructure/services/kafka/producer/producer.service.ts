@@ -50,6 +50,12 @@ class ProducerService implements IProducerService {
         })
     }
 
+    private buildProducer(): Producer {
+        return this.kafka.producer({
+            createPartitioner: Partitioners.LegacyPartitioner
+        })
+    }
+
     async produce<Req>(topic: Topic, data: Req): Promise<void> {
         const foundedProducer = this.producers.get(topic)
         if (foundedProducer) {
@@ -57,9 +63,7 @@ class ProducerService implements IProducerService {
             return this.logger.log('Success sent message from found producer')
         }
 
-        const createdProducer = this.kafka.producer({
-            createPartitioner: Partitioners.LegacyPartitioner
-        })
+        const createdProducer = this.buildProducer()
         await createdProducer.connect()
         this.logger.log('Success created producer')
 
@@ -85,9 +89,7 @@ class ProducerService implements IProducerService {
             return foundSubject as Subject<Res>
         }
 
-        const createdProducer = this.kafka.producer({
-            createPartitioner: Partitioners.LegacyPartitioner
-        })
+        const createdProducer = this.buildProducer()
         await createdProducer.connect()
         this.logger.log('Success created producer')
 

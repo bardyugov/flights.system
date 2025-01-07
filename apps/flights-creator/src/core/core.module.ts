@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import path from 'path'
-import { HelloModule } from '../infrastructure/handlers/city-handler/city.module'
+import { HelloModule } from '../infrastructure/handlers/city/city.module'
 import { ServicesModule } from '../infrastructure/services/services.module'
 
 @Module({

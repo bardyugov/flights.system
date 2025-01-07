@@ -1,7 +1,6 @@
 enum Topic {
-    CITY_TOPIC = 'city.topic',
-    CITY_TOPIC_REPLY = 'city.topic.reply',
-    AIRPLANE_TOPIC = 'airplane.topic'
+    CITY_CREATE_TOPIC = 'city.create.topic',
+    CITY_CREATE_TOPIC_REPLY = 'city.create.topic.reply'
 }
 
 export { Topic }

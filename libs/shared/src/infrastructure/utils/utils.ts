@@ -3,7 +3,8 @@ import { Logger } from '@nestjs/common'
 
 enum InjectServices {
     ConsumerService = 'ConsumerService',
-    ProducerService = 'ProducerService'
+    ProducerService = 'ProducerService',
+    CityService = 'CityService'
 }
 
 function parseArrayFromConfig(value: string) {

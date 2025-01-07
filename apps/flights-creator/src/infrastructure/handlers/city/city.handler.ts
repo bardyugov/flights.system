@@ -6,42 +6,32 @@ import {
     OnModuleInit
 } from '@nestjs/common'
 import {
-    AirplaneCreateReq,
-    CityCreateReq,
-    CityCreateRes,
+    CreateCityDto,
     IConsumerService,
     InjectServices,
     Topic
 } from '@flights.system/shared'
+import { ICityService } from '../../../application/services/city.service'
+import { CityEntity } from '../../entities/city.entity'
 
 @Controller()
 class CityHandler implements OnModuleInit, OnModuleDestroy {
     private readonly logger = new Logger(CityHandler.name)
+
     constructor(
         @Inject(InjectServices.ConsumerService)
-        private readonly consumerService: IConsumerService
+        private readonly consumerService: IConsumerService,
+        @Inject(InjectServices.CityService)
+        private readonly cityService: ICityService
     ) {}
 
     async onModuleInit() {
         await this.consumerService.connect()
 
-        await this.consumerService.subscribe<AirplaneCreateReq>(
-            Topic.AIRPLANE_TOPIC,
-            async msg => {
-                this.logger.debug(`Received msg ${JSON.stringify(msg)}`)
-            }
-        )
-
         await this.consumerService.subscribeWithReply<
-            CityCreateReq,
-            CityCreateRes
-        >(Topic.CITY_TOPIC, async msg => {
-            this.logger.debug(`Received msg ${JSON.stringify(msg)}`)
-            return {
-                id: 'new id',
-                name: msg.name
-            }
-        })
+            CreateCityDto,
+            CityEntity
+        >(Topic.CITY_CREATE_TOPIC, this.cityService.create)
     }
 
     async onModuleDestroy() {
