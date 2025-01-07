@@ -1,4 +1,4 @@
-import { DataSource, QueryFailedError, TypeORMError } from 'typeorm'
+import { DataSource } from 'typeorm'
 import { Seeder } from 'typeorm-extension'
 import {
     AirplaneStatusEntity,

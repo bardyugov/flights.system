@@ -29,4 +29,5 @@ import { FlightEntity } from '../entities/flight.entity'
     ]
 })
 class DatabaseModule {}
+
 export { DatabaseModule }

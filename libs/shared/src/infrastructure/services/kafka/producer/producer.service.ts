@@ -72,6 +72,31 @@ class ProducerService implements IProducerService {
         this.logger.log('Success sent message from created producer')
     }
 
+    async produceEmptyMsgWithReply<Res>(topic: Topic): Promise<Subject<Res>> {
+        const foundedProducer = this.producers.get(topic)
+        const replyTopic = buildReplyTopic(topic.toString())
+        const foundSubject = this.subjects.get(replyTopic)
+        if (!foundSubject) {
+            throw new NotFoundReplyTopicException('Not found reply topic')
+        }
+
+        if (foundedProducer) {
+            await this.sendMessage(foundedProducer, topic, '')
+            this.logger.log('Success sent message from found producer')
+            return foundSubject as Subject<Res>
+        }
+
+        const createdProducer = this.buildProducer()
+        await createdProducer.connect()
+        this.logger.log('Success created producer')
+
+        await this.sendMessage(createdProducer, topic, '')
+        this.producers.set(topic, createdProducer)
+        this.logger.log('Success sent message from created producer')
+
+        return foundSubject as Subject<Res>
+    }
+
     async produceWithReply<Req, Res>(
         topic: Topic,
         data: Req

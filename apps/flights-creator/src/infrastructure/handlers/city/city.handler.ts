@@ -6,13 +6,14 @@ import {
     OnModuleInit
 } from '@nestjs/common'
 import {
-    CreateCityDto,
+    CreateCityReq,
+    CreatedCityRes,
     IConsumerService,
     InjectServices,
+    KafkaResult,
     Topic
 } from '@flights.system/shared'
 import { ICityService } from '../../../application/services/city.service'
-import { CityEntity } from '../../entities/city.entity'
 
 @Controller()
 class CityHandler implements OnModuleInit, OnModuleDestroy {
@@ -29,9 +30,25 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
         await this.consumerService.connect()
 
         await this.consumerService.subscribeWithReply<
-            CreateCityDto,
-            CityEntity
-        >(Topic.CITY_CREATE_TOPIC, this.cityService.create)
+            CreateCityReq,
+            KafkaResult<CreatedCityRes>
+        >(
+            Topic.CITY_CREATE_TOPIC,
+            async msg => await this.cityService.create(msg)
+        )
+
+        await this.consumerService.subscribeEmptyMsgWithReply<CreatedCityRes[]>(
+            Topic.CITY_GET_TOPIC,
+            async () => this.cityService.getMany(20)
+        )
+
+        await this.consumerService.subscribeWithReply<
+            string,
+            KafkaResult<CreatedCityRes>
+        >(
+            Topic.CITY_FIND_BY_NAME_TOPIC,
+            async msg => await this.cityService.findByName(msg)
+        )
     }
 
     async onModuleDestroy() {

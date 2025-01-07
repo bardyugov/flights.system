@@ -7,6 +7,32 @@ enum InjectServices {
     CityService = 'CityService'
 }
 
+type Ok<T> = {
+    state: 'ok'
+    value: T
+}
+
+type Error = {
+    state: 'error'
+    message: string
+}
+
+function ok<T>(value: T): Ok<T> {
+    return {
+        state: 'ok',
+        value: value
+    }
+}
+
+function error(msg: string): Error {
+    return {
+        state: 'error',
+        message: msg
+    }
+}
+
+type KafkaResult<T> = Ok<T> | Error
+
 function parseArrayFromConfig(value: string) {
     if (value === '' || !value) {
         return []
@@ -66,5 +92,8 @@ export {
     parseArrayFromConfig,
     initKafkaLogger,
     buildReplyTopic,
-    safelyParseBuffer
+    safelyParseBuffer,
+    KafkaResult,
+    ok,
+    error
 }

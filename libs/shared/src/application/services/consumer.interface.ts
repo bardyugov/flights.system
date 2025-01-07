@@ -2,6 +2,10 @@ import { Topic } from '../../infrastructure/services/kafka'
 
 interface IConsumerService {
     connect(): Promise<void>
+    subscribeEmptyMsgWithReply<Res>(
+        topic: Topic,
+        callback: () => Promise<Res>
+    ): Promise<void>
     subscribeWithReply<Req, Res>(
         topic: Topic,
         callback: (message: Req) => Promise<Res>

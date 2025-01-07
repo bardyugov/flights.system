@@ -132,6 +132,38 @@ class ConsumerService implements IConsumerService {
         this.logger.log('Success subscribing')
     }
 
+    async subscribeEmptyMsgWithReply<Res>(
+        topic: Topic,
+        callback: () => Promise<Res>
+    ): Promise<void> {
+        const foundedConsumer = this.consumers.get(topic)
+        if (foundedConsumer) {
+            return this.logger.log(
+                'Consumer already exist and subscribe to topic'
+            )
+        }
+
+        const consumer = this.kafka.consumer({
+            groupId: this.buildUniqueConsumerGroup(topic)
+        })
+        await consumer.subscribe({ topic, fromBeginning: true })
+
+        await consumer.run({
+            eachMessage: async () => {
+                const replyTopic = buildReplyTopic(topic) as Topic
+                const replyData = await callback()
+                await this.producerService.produce(replyTopic, replyData)
+            }
+        })
+
+        this.logger.log(
+            `Success created consumer with topic: ${topic} and consumerGroupId: ${this.consumerGroupId}`
+        )
+        this.consumers.set(topic, consumer)
+
+        this.logger.log('Success subscribing')
+    }
+
     async disconnect(): Promise<void> {
         for (const consumer of this.consumers.values()) {
             await consumer.disconnect()
