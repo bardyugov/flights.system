@@ -1,7 +1,7 @@
 {
-    "name": "flights-creator",
+    "name": "flights.creator.service",
     "$schema": "../../node_modules/nx/schemas/project-schema.json",
-    "sourceRoot": "apps/flights-creator/src",
+    "sourceRoot": "apps/flights.creator.service/src",
     "projectType": "application",
     "tags": [],
     "targets": {
@@ -22,15 +22,15 @@
             "defaultConfiguration": "development",
             "dependsOn": ["build"],
             "options": {
-                "buildTarget": "flights-creator:build",
+                "buildTarget": "flights.creator.service:build",
                 "runBuildTargetDependencies": false
             },
             "configurations": {
                 "development": {
-                    "buildTarget": "flights-creator:build:development"
+                    "buildTarget": "flights.creator.service:build:development"
                 },
                 "production": {
-                    "buildTarget": "flights-creator:build:production"
+                    "buildTarget": "flights.creator.service:build:production"
                 }
             }
         },
@@ -38,28 +38,28 @@
           "executor": "nx:run-commands",
           "options": {
             "command": "ts-node --project tsconfig.app.json ../../node_modules/typeorm/cli migration:generate ./src/infrastructure/database/migrations/{args.name} -d ./src/infrastructure/database/database.context.ts",
-            "cwd": "apps/flights-creator"
+            "cwd": "apps/flights.creator.service"
           }
         },
       "migration:apply": {
         "executor": "nx:run-commands",
         "options": {
           "command": "ts-node --project tsconfig.app.json ../../node_modules/typeorm/cli migration:run -d ./src/infrastructure/database/database.context.ts",
-          "cwd": "apps/flights-creator"
+          "cwd": "apps/flights.creator.service"
         }
       },
       "seeds:run": {
         "executor": "nx:run-commands",
         "options": {
           "command": "ts-node --project tsconfig.app.json ./src/infrastructure/database/seeds/runner.ts",
-          "cwd": "apps/flights-creator"
+          "cwd": "apps/flights.creator.service"
         }
       },
       "seed:run": {
         "executor": "nx:run-commands",
         "options": {
           "command": "ts-node --project tsconfig.app.json ../../node_modules/typeorm-extension/bin/cli.cjs seed:run -d ./src/infrastructure/database/database.context.ts",
-          "cwd": "apps/flights-creator"
+          "cwd": "apps/flights.creator.service"
         }
       }
     }

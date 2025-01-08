@@ -22,14 +22,16 @@ class CityService implements ICityService {
     ) {}
 
     async create(dto: CreateCityReq): Promise<KafkaResult<CreatedCityRes>> {
-        const isFounded = await this.cityRepository.findOne({
+        const founded = await this.cityRepository.findOne({
             where: {
                 name: dto.name
             }
         })
-        if (isFounded) {
+        if (founded) {
+            this.logger.warn(`City already exists with name ${founded.name}`)
             return error('City already exists')
         }
+
         const createdCity = await this.cityRepository.save(
             new CityEntity(dto.name, dto.country)
         )
@@ -53,19 +55,18 @@ class CityService implements ICityService {
     }
 
     async findByName(name: string): Promise<KafkaResult<CreatedCityRes>> {
-        const foundCity = await this.cityRepository
+        const foundedCity = await this.cityRepository
             .createQueryBuilder('city')
             .where('city.name like :name', { name })
             .getOne()
-
-        if (!foundCity) {
+        if (!foundedCity) {
             return error('Not found city')
         }
 
         return ok<CreatedCityRes>({
-            name: foundCity.name,
-            country: foundCity.country,
-            createAt: foundCity.createAt
+            name: foundedCity.name,
+            country: foundedCity.country,
+            createAt: foundedCity.createAt
         })
     }
 }

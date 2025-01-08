@@ -1,6 +1,6 @@
 ## Run database server
 ```sh
-cd docker/flights-creator-cluster
+cd docker/flights.creator.service-cluster
 docker-compose up --build -d
 ```
 
@@ -17,25 +17,25 @@ export NODE_ENV=development || production
 
 ## Apply migrations
 ```sh
-npx nx run flights-creator:migration:apply
+npx nx run flights.creator.service:migration:apply
 ```
 
 ## Generating new migration
 ```sh
-npx nx run flights-creator:migration:generate --name={migrationName}
+npx nx run flights.creator.service:migration:generate --name={migrationName}
 ```
 
 ## Run seeds 
 ```sh
-npx nx run flights-creator:seeds:run
+npx nx run flights.creator.service:seeds:run
 ```
 
 ## Build service
 ```sh
-npx nx run flights-creator:build
+npx nx run flights.creator.service:build
 ```
 
 ## Run service
 ```sh
-npx nx run flights-creator:serve
+npx nx run flights.creator.service:serve
 ```

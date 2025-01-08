@@ -63,7 +63,6 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
         return new Promise(res => subject.subscribe(res))
     }
 
-    @Get('')
     async onModuleInit() {
         await this.producer.subscribeOfReply(Topic.CITY_CREATE_TOPIC_REPLY)
         await this.producer.subscribeOfReply(Topic.CITY_GET_TOPIC_REPLY)
