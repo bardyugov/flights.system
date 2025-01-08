@@ -56,6 +56,34 @@ class ProducerService implements IProducerService {
         })
     }
 
+    private async buildProduceWithReplyHandler<Req, Res>(
+        topic: Topic,
+        data?: Req
+    ): Promise<Subject<Res>> {
+        const foundedProducer = this.producers.get(topic)
+        const replyTopic = buildReplyTopic(topic.toString())
+        const foundSubject = this.subjects.get(replyTopic)
+        if (!foundSubject) {
+            throw new NotFoundReplyTopicException('Not found reply topic')
+        }
+
+        if (foundedProducer) {
+            await this.sendMessage(foundedProducer, topic, data || null)
+            this.logger.log('Success sent message from found producer')
+            return foundSubject as Subject<Res>
+        }
+
+        const createdProducer = this.buildProducer()
+        await createdProducer.connect()
+        this.logger.log('Success created producer')
+
+        await this.sendMessage(createdProducer, topic, data || null)
+        this.producers.set(topic, createdProducer)
+        this.logger.log('Success sent message from created producer')
+
+        return foundSubject as Subject<Res>
+    }
+
     async produce<Req>(topic: Topic, data: Req): Promise<void> {
         const foundedProducer = this.producers.get(topic)
         if (foundedProducer) {
@@ -73,56 +101,14 @@ class ProducerService implements IProducerService {
     }
 
     async produceEmptyMsgWithReply<Res>(topic: Topic): Promise<Subject<Res>> {
-        const foundedProducer = this.producers.get(topic)
-        const replyTopic = buildReplyTopic(topic.toString())
-        const foundSubject = this.subjects.get(replyTopic)
-        if (!foundSubject) {
-            throw new NotFoundReplyTopicException('Not found reply topic')
-        }
-
-        if (foundedProducer) {
-            await this.sendMessage(foundedProducer, topic, '')
-            this.logger.log('Success sent message from found producer')
-            return foundSubject as Subject<Res>
-        }
-
-        const createdProducer = this.buildProducer()
-        await createdProducer.connect()
-        this.logger.log('Success created producer')
-
-        await this.sendMessage(createdProducer, topic, '')
-        this.producers.set(topic, createdProducer)
-        this.logger.log('Success sent message from created producer')
-
-        return foundSubject as Subject<Res>
+        return this.buildProduceWithReplyHandler<unknown, Res>(topic)
     }
 
     async produceWithReply<Req, Res>(
         topic: Topic,
         data: Req
     ): Promise<Subject<Res>> {
-        const foundedProducer = this.producers.get(topic)
-        const replyTopic = buildReplyTopic(topic.toString())
-        const foundSubject = this.subjects.get(replyTopic)
-        if (!foundSubject) {
-            throw new NotFoundReplyTopicException('Not found reply topic')
-        }
-
-        if (foundedProducer) {
-            await this.sendMessage(foundedProducer, topic, data)
-            this.logger.log('Success sent message from found producer')
-            return foundSubject as Subject<Res>
-        }
-
-        const createdProducer = this.buildProducer()
-        await createdProducer.connect()
-        this.logger.log('Success created producer')
-
-        await this.sendMessage(createdProducer, topic, data)
-        this.producers.set(topic, createdProducer)
-        this.logger.log('Success sent message from created producer')
-
-        return foundSubject as Subject<Res>
+        return this.buildProduceWithReplyHandler<Req, Res>(topic, data)
     }
 
     async subscribeOfReply(topic: Topic): Promise<void> {

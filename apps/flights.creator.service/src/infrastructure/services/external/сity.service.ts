@@ -60,7 +60,7 @@ class CityService implements ICityService {
             createAt: c.createAt
         }))
 
-        await this.cacheManager.set('city.many', citiesRes, 3000)
+        await this.cacheManager.set('city.many', citiesRes, 10000)
         this.logger.log('Success get cities from db')
         return citiesRes
     }
@@ -70,6 +70,7 @@ class CityService implements ICityService {
             .createQueryBuilder('city')
             .where('city.name like :name', { name })
             .getOne()
+
         if (!foundedCity) {
             return error('Not found city')
         }
