@@ -4,24 +4,27 @@ import { DatabaseModule } from '../database/database.module'
 import { AccumulatorService } from './internal/accumulator.service'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { CityEntity } from '../entities/city.entity'
-/*
 import { CacheModule } from '@nestjs/cache-manager'
 import { ConfigService } from '@nestjs/config'
-import * as redisStore from 'cache-manager-redis-store'
-*/
+import { redisStore } from 'cache-manager-redis-yet'
 
 @Module({
     imports: [
         DatabaseModule,
-        TypeOrmModule.forFeature([CityEntity])
-        /*CacheModule.registerAsync({
+        TypeOrmModule.forFeature([CityEntity]),
+        CacheModule.registerAsync({
             inject: [ConfigService],
-            useFactory: (config: ConfigService) => ({
-                store: redisStore,
-                host: 'localhost',
-                port: 6379
+            useFactory: async (config: ConfigService) => ({
+                store: await redisStore({
+                    username: config.get<string>('REDIS_USERNAME'),
+                    password: config.get<string>('REDIS_PASSWORD'),
+                    socket: {
+                        port: config.get<number>('REDIS_PORT'),
+                        host: 'localhost'
+                    }
+                })
             })
-        })*/
+        })
     ],
     providers: [CityProvider, AccumulatorService],
     exports: [CityProvider]

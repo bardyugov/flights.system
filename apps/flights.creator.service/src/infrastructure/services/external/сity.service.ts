@@ -1,5 +1,5 @@
 import { ICityService } from '../../../application/services/city.service'
-import { Injectable, Logger, Provider } from '@nestjs/common'
+import { Inject, Injectable, Logger, Provider } from '@nestjs/common'
 import { CityEntity } from '../../entities/city.entity'
 import {
     CreateCityReq,
@@ -11,6 +11,7 @@ import {
 } from '@flights.system/shared'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
 @Injectable()
 class CityService implements ICityService {
@@ -18,7 +19,8 @@ class CityService implements ICityService {
 
     constructor(
         @InjectRepository(CityEntity)
-        private readonly cityRepository: Repository<CityEntity>
+        private readonly cityRepository: Repository<CityEntity>,
+        @Inject(CACHE_MANAGER) private readonly cacheManager: Cache
     ) {}
 
     async create(dto: CreateCityReq): Promise<KafkaResult<CreatedCityRes>> {
@@ -45,13 +47,22 @@ class CityService implements ICityService {
     }
 
     async getMany(limit: number): Promise<CreatedCityRes[]> {
-        const cities = await this.cityRepository.find({ take: limit })
+        const cache = await this.cacheManager.get<CreatedCityRes[]>('city.many')
+        if (cache) {
+            this.logger.log('Success find cities in cache')
+            return cache
+        }
 
-        return cities.map<CreatedCityRes>(c => ({
+        const cities = await this.cityRepository.find({ take: limit })
+        const citiesRes = cities.map<CreatedCityRes>(c => ({
             name: c.name,
             country: c.country,
             createAt: c.createAt
         }))
+
+        await this.cacheManager.set('city.many', citiesRes, 3000)
+        this.logger.log('Success get cities from db')
+        return citiesRes
     }
 
     async findByName(name: string): Promise<KafkaResult<CreatedCityRes>> {

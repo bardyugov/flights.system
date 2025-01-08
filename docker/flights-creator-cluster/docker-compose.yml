@@ -10,14 +10,17 @@ services:
     env_file:
       - .env
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - ./volumes/postgres-data:/var/lib/postgresql/data
 
   redis:
     image: bitnami/redis:7.4
     container_name: cache
     ports:
       - "6379:6379"
-    env_file:
-      - .env
+    environment:
+      REDIS_PASSWORD: 12345
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     volumes:
-      - ./redis-data:/data
+      - ./volumes/redis-data:/data
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
+
