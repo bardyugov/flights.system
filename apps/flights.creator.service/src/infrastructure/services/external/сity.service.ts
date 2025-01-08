@@ -39,11 +39,7 @@ class CityService implements ICityService {
         )
 
         this.logger.log(`Success created city with id: ${createdCity.id}`)
-        return ok<CreatedCityRes>({
-            name: createdCity.name,
-            country: createdCity.country,
-            createAt: createdCity.createAt
-        })
+        return ok<CreatedCityRes>({ ...createdCity })
     }
 
     async getMany(limit: number): Promise<CreatedCityRes[]> {
@@ -55,9 +51,7 @@ class CityService implements ICityService {
 
         const cities = await this.cityRepository.find({ take: limit })
         const citiesRes = cities.map<CreatedCityRes>(c => ({
-            name: c.name,
-            country: c.country,
-            createAt: c.createAt
+            ...c
         }))
 
         await this.cacheManager.set('city.many', citiesRes, 10000)
