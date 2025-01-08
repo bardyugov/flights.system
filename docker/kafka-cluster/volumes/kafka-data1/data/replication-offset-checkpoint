@@ -28,11 +28,11 @@ city.get.topic 2 13
 city.find.topic.reply 0 7
 __consumer_offsets 22 0
 city.create.topic 0 3
-__consumer_offsets 46 16
+__consumer_offsets 46 17
 __consumer_offsets 42 0
 __consumer_offsets 28 0
 __consumer_offsets 4 0
 __consumer_offsets 38 0
-__consumer_offsets 34 14
+__consumer_offsets 34 15
 city.get.topic 1 12
 __consumer_offsets 14 0
