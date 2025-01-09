@@ -6,11 +6,11 @@ import { FlightSeeder } from './seeders/flight.seeder'
 import { AirplaneSeeder } from './seeders/airplane.seeder'
 
 async function run() {
-    await context.initialize()
-    await runSeeder(context, CitySeeder)
-    await runSeeder(context, AirplaneStatusSeeder)
-    await runSeeder(context, FlightSeeder)
-    await runSeeder(context, AirplaneSeeder)
+   await context.initialize()
+   await runSeeder(context, CitySeeder)
+   await runSeeder(context, AirplaneStatusSeeder)
+   await runSeeder(context, FlightSeeder)
+   await runSeeder(context, AirplaneSeeder)
 }
 
 run()

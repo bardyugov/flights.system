@@ -1,9 +1,12 @@
-export * from '../../../application/services/consumer.interface'
-export * from './consumer/consumer.service'
-export * from './consumer/consumer.module'
+export * from '../../application/services/consumer.interface'
+export * from './kafka/consumer/consumer.service'
+export * from './kafka/consumer/consumer.module'
 
-export * from '../../../application/services/producer.inteface'
-export * from './producer/producer.service'
-export * from './producer/producer.module'
+export * from '../../application/services/producer.inteface'
+export * from './kafka/producer/producer.service'
+export * from './kafka/producer/producer.module'
 
-export * from './topics/topic'
+export * from './kafka/topics/topic'
+
+export * from './logger/logger.service'
+export * from './logger/logger.module'

@@ -1,6 +1,10 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# logs
+/logs
+
 # volumes
-/volumes
+volumes/
 
 # compiled output
 dist

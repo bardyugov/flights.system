@@ -4,14 +4,14 @@ import { CityEntity } from '../../../entities/city.entity'
 import { maxCountWritten } from '../../constants'
 
 class CitySeeder implements Seeder {
-    track?: boolean
-    async run(
-        dataSource: DataSource,
-        factoryManager: SeederFactoryManager
-    ): Promise<void> {
-        const factory = factoryManager.get(CityEntity)
-        await factory.saveMany(maxCountWritten)
-    }
+   track?: boolean
+   async run(
+      dataSource: DataSource,
+      factoryManager: SeederFactoryManager
+   ): Promise<void> {
+      const factory = factoryManager.get(CityEntity)
+      await factory.saveMany(maxCountWritten)
+   }
 }
 
 export { CitySeeder }

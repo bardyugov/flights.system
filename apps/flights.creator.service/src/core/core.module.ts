@@ -5,17 +5,17 @@ import { HelloModule } from '../infrastructure/handlers/city/city.module'
 import { ServicesModule } from '../infrastructure/services/services.module'
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-            envFilePath: path.join(
-                __dirname,
-                `./assets/.${process.env.NODE_ENV}.env`
-            )
-        }),
-        HelloModule,
-        ServicesModule
-    ]
+   imports: [
+      ConfigModule.forRoot({
+         isGlobal: true,
+         envFilePath: path.join(
+            __dirname,
+            `./assets/.${process.env.NODE_ENV}.env`
+         )
+      }),
+      HelloModule,
+      ServicesModule
+   ]
 })
 class CoreModule {}
 

@@ -3,9 +3,9 @@ import { ConsumerServiceProvider } from './consumer.service'
 import { ProducerModule } from '../producer/producer.module'
 
 @Module({
-    imports: [forwardRef(() => ProducerModule)],
-    providers: [ConsumerServiceProvider],
-    exports: [ConsumerServiceProvider]
+   imports: [forwardRef(() => ProducerModule)],
+   providers: [ConsumerServiceProvider],
+   exports: [ConsumerServiceProvider]
 })
 class ConsumerModule {}
 

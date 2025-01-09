@@ -4,16 +4,16 @@ import path from 'path'
 import { CityModule } from '../infrastructure/handlers/city/city.module'
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-            envFilePath: path.join(
-                __dirname,
-                `./assets/.${process.env.NODE_ENV}.env`
-            )
-        }),
-        CityModule
-    ]
+   imports: [
+      ConfigModule.forRoot({
+         isGlobal: true,
+         envFilePath: path.join(
+            __dirname,
+            `./assets/.${process.env.NODE_ENV}.env`
+         )
+      }),
+      CityModule
+   ]
 })
 class CoreModule {}
 

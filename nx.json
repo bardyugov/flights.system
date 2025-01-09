@@ -37,8 +37,7 @@
             },
             "exclude": [
                 "apps/gateway-e2e/**/*",
-                "apps/flights-creator-e2e/**/*",
-                "apps/emploees.service-e2e/**/*"
+                "apps/flights-creator-e2e/**/*"
             ]
         }
     ],

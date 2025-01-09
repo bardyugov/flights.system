@@ -11,8 +11,6 @@ services:
 
   kafka1:
     image: bitnami/kafka:3.7.0
-    restart:
-      always
     depends_on:
       - zookeeper
     env_file:
@@ -34,8 +32,6 @@ services:
 
   kafka2:
     image: bitnami/kafka:3.7.0
-    restart:
-      always
     depends_on:
       - zookeeper
     env_file:
@@ -67,19 +63,20 @@ services:
   elastic-search:
     image: elasticsearch:8.17.0
     container_name: elastic-search
+    env_file:
+      - .env
     ports:
       - "9200:9200"
     volumes:
-      - ./config/elastic-search.yml:/usr/share/elasticsearch/config/elasticsearch.yml
       - ./volumes/elastic-search-data:/usr/share/elasticsearch/data
 
   kibana:
     image: kibana:8.17.0
     container_name: kibana
+    env_file:
+      - .env
     ports:
       - "5601:5601"
-    volumes:
-      - ./config/kibana.yml:/usr/share/kibana/config/kibana.yml
     depends_on:
       - elastic-search
 
