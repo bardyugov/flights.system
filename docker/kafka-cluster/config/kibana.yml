@@ -1,3 +1,0 @@
-elasticsearch.hosts: ["http://localhost:9200"]
-elasticsearch.username: "root"
-elasticsearch.password: "12345"
