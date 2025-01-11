@@ -1,9 +1,9 @@
 version: '3.9'
 
 services:
-  database:
+  postgres:
     image: postgres:15.3
-    container_name: database
+    container_name: postgres
     restart: always
     ports:
       - '5432:5432'
@@ -11,10 +11,12 @@ services:
       - .env
     volumes:
       - ./volumes/postgres-data:/var/lib/postgresql/data
+    networks:
+      - shared-network
 
   redis:
     image: bitnami/redis:7.4
-    container_name: cache
+    container_name: redis
     ports:
       - "6379:6379"
     environment:
@@ -23,10 +25,29 @@ services:
     volumes:
       - ./volumes/redis-data:/data
       - ./config/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - shared-network
 
+  flights.creator.service:
+    container_name: flights.creator.service
+    build:
+      context: ../../
+      dockerfile: ./apps/flights.creator.service/Dockerfile
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - '3000:3000'
+    networks:
+      - shared-network
+
+networks:
+  shared-network:
+    external: true
 
 volumes:
   postgres-data:
     driver: local
   redis-data:
     driver: local
+

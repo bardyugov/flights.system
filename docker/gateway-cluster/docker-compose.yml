@@ -1,0 +1,16 @@
+version: '3.9'
+
+services:
+  gateway:
+    container_name: gateway
+    build:
+      context: ../../
+      dockerfile: ./apps/gateway/Dockerfile
+    ports:
+      - '5001:5001'
+    networks:
+      - shared-network
+
+networks:
+  shared-network:
+    external: true

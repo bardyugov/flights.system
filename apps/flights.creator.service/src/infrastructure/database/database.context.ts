@@ -2,6 +2,7 @@ import { DataSource, DataSourceOptions } from 'typeorm'
 import dotenv from 'dotenv'
 import path from 'path'
 import { SeederOptions } from 'typeorm-extension'
+import * as process from 'node:process'
 
 if (!process.env.NODE_ENV) {
    throw new Error('NODE_ENV environment variable is missing')
@@ -19,10 +20,12 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
    password: process.env.POSTGRES_PASSWORD,
    database: process.env.POSTGRES_DB,
    synchronize: false,
-   entities: ['./src/infrastructure/entities/*.entity.ts'],
+   entities: ['./src/infrastructure/entities/*.entity{.ts, .js}'],
    migrations: ['./src/infrastructure/database/migrations/*.ts'],
-   seeds: ['src/infrastructure/database/seeds/seeders/*.seeder.ts'],
-   factories: ['src/infrastructure/database/seeds/factories/*.factory.ts']
+   seeds: ['src/infrastructure/database/seeds/seeders/*.seeder{.ts, .js}'],
+   factories: [
+      'src/infrastructure/database/seeds/factories/*.factory{.ts, .js}'
+   ]
 }
 
 export default new DataSource(dataSourceOptions)

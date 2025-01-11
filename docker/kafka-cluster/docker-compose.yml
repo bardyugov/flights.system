@@ -4,15 +4,17 @@ services:
   zookeeper:
     image: bitnami/zookeeper:3.9.1
     container_name: zookeper
-    tmpfs: "/zktmp"
+    tmpfs: '/zktmp'
     environment:
       ALLOW_ANONYMOUS_LOGIN: 'yes'
     ports:
-      - "2181:2181"
+      - '2181:2181'
+    networks:
+      - shared-network
 
   kafka1:
     image: bitnami/kafka:3.7.0
-    container_name: kafka1
+    container_name: kafka-1
     depends_on:
       - zookeeper
     env_file:
@@ -27,14 +29,16 @@ services:
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
       - ALLOW_PLAINTEXT_LISTENER=yes
     ports:
-      - "9092:9092"
-      - "29092:29092"
+      - '9092:9092'
+      - '29092:29092'
+    networks:
+      - shared-network
     volumes:
       - ./volumes/kafka-data1:/bitnami/kafka
 
   kafka2:
     image: bitnami/kafka:3.7.0
-    container_name: kafka2
+    container_name: kafka-2
     depends_on:
       - zookeeper
     env_file:
@@ -49,47 +53,32 @@ services:
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
       - ALLOW_PLAINTEXT_LISTENER=yes
     ports:
-      - "9093:9093"
-      - "29093:29093"
+      - '9093:9093'
+      - '29093:29093'
+    networks:
+      - shared-network
     volumes:
       - ./volumes/kafka-data2:/bitnami/kafka
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
     depends_on:
       - kafka1
       - kafka2
     ports:
-      - "8080:8080"
+      - '8080:8080'
+    networks:
+      - shared-network
     env_file:
       - .env
 
-  elastic-search:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
-    container_name: elastic-search
-    environment:
-      - xpack.security.enabled=false
-      - discovery.type=single-node
-    ports:
-      - "9200:9200"
-    volumes:
-      - ./volumes/elastic-search-data:/usr/share/elasticsearch/data
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.17.0
-    container_name: kibana
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports:
-      - "5601:5601"
-    depends_on:
-      - elastic-search
+networks:
+  shared-network:
+    external: true
 
 volumes:
   kafka_data1:
     driver: local
   kafka_data2:
     driver: local
-  elastic-search-data:
-    driver: local
-

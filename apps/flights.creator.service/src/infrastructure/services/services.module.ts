@@ -20,7 +20,7 @@ import { redisStore } from 'cache-manager-redis-yet'
                password: config.get<string>('REDIS_PASSWORD'),
                socket: {
                   port: config.get<number>('REDIS_PORT'),
-                  host: 'localhost'
+                  host: config.get<string>('REDIS_HOST')
                }
             })
          })
