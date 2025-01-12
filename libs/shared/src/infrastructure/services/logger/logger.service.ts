@@ -1,17 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, LoggerService } from '@nestjs/common'
 import * as winston from 'winston'
 
-@Injectable()
-class LoggerService extends Logger {
+class MyLoggerService extends Logger implements LoggerService {
    private readonly logger: winston.Logger
 
-   constructor(context: string) {
+   constructor(private readonly context: string) {
       super(context)
-
       this.logger = winston.createLogger({
          level: 'info',
          format: winston.format.combine(
             winston.format.timestamp(),
+            winston.format.colorize(),
             winston.format.simple()
          ),
          transports: [
@@ -40,21 +39,21 @@ class LoggerService extends Logger {
       })
    }
 
-   log(message: string, context?: string) {
-      this.logger.info(message, { context })
+   log(message: string) {
+      this.logger.info(message, { context: this.context })
    }
 
-   error(message: string, trace?: string, context?: string) {
-      this.logger.error(message, { trace, context })
+   error(message: string, trace?: string) {
+      this.logger.error(message, { trace, context: this.context })
    }
 
-   debug(message: string, context?: string) {
-      this.logger.debug(message, { context })
+   debug(message: string) {
+      this.logger.debug(message, { context: this.context })
    }
 
-   warn(message: string, context?: string) {
-      this.logger.warn(message, { context })
+   warn(message: string) {
+      this.logger.warn(message, { context: this.context })
    }
 }
 
-export { LoggerService }
+export { MyLoggerService }

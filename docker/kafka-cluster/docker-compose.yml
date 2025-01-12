@@ -5,8 +5,8 @@ services:
     image: bitnami/zookeeper:3.9.1
     container_name: zookeper
     tmpfs: '/zktmp'
-    environment:
-      ALLOW_ANONYMOUS_LOGIN: 'yes'
+    env_file:
+      - .zookeper.env
     ports:
       - '2181:2181'
     networks:
@@ -18,7 +18,7 @@ services:
     depends_on:
       - zookeeper
     env_file:
-      - .env
+      - .kafka.env
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
@@ -42,7 +42,7 @@ services:
     depends_on:
       - zookeeper
     env_file:
-      - .env
+      - .kafka.env
     environment:
       - KAFKA_BROKER_ID=2
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
@@ -72,6 +72,30 @@ services:
       - shared-network
     env_file:
       - .env
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    container_name: elasticsearch
+    env_file:
+      - .elastic.env
+    ports:
+      - '9200:9200'
+    volumes:
+      - ./volumes/elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - shared-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.17.0
+    container_name: kibana
+    ports:
+      - '5601:5601'
+    env_file:
+      - .kibana.env
+    depends_on:
+      - elasticsearch
+    networks:
+      - shared-network
 
 networks:
   shared-network:
