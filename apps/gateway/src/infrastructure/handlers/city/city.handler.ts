@@ -6,8 +6,7 @@ import {
    OnModuleInit,
    Post,
    Query,
-   BadRequestException,
-   Logger
+   BadRequestException
 } from '@nestjs/common'
 import {
    CreateCityReq,
@@ -15,12 +14,13 @@ import {
    InjectServices,
    IProducerService,
    KafkaResult,
-   Topic
+   Topic,
+   LoggerService
 } from '@flights.system/shared'
 
 @Controller('/city')
 class CityHandler implements OnModuleInit, OnModuleDestroy {
-   private readonly logger = new Logger(CityHandler.name)
+   private readonly logger = new LoggerService(CityHandler.name)
    constructor(
       @Inject(InjectServices.ProducerService)
       private readonly producer: IProducerService

@@ -1,10 +1,4 @@
-import {
-   forwardRef,
-   Inject,
-   Injectable,
-   Logger,
-   Provider
-} from '@nestjs/common'
+import { forwardRef, Inject, Injectable, Provider } from '@nestjs/common'
 import { Kafka, Producer, Partitioners } from 'kafkajs'
 import {
    initKafkaLogger,
@@ -18,13 +12,14 @@ import { IConsumerService } from '../../../../application/services/consumer.inte
 import { Subject } from 'rxjs'
 import { NotFoundReplyTopicException } from '../../../common/exceptions/producer.exception'
 import { Topic } from '../topics/topic'
+import { LoggerService } from '../../logger/logger.service'
 
 @Injectable()
 class ProducerService implements IProducerService {
    private readonly kafka: Kafka
-   private readonly logger = new Logger(ProducerService.name)
    private readonly producers = new Map<string, Producer>()
    private readonly subjects = new Map<string, Subject<unknown>>()
+   private readonly logger = new LoggerService(ProducerService.name)
 
    constructor(
       @Inject(forwardRef(() => InjectServices.ConsumerService))

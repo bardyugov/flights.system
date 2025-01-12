@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
 import { DataSource } from 'typeorm'
 import { es, Faker } from '@faker-js/faker'
@@ -6,11 +6,12 @@ import { FlightEntity } from '../../entities/flight.entity'
 import { AirplaneEntity } from '../../entities/airplane.entity'
 import { CityEntity } from '../../entities/city.entity'
 import { FlightInsertQuery } from '../../database/query-types'
+import { LoggerService } from '@flights.system/shared'
 
 @Injectable()
 class AccumulatorService {
-   private readonly logger = new Logger(AccumulatorService.name)
    private readonly faker = new Faker({ locale: [es] })
+   private readonly logger = new LoggerService(AccumulatorService.name)
 
    constructor(private readonly context: DataSource) {}
 

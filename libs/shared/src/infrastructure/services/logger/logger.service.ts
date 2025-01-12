@@ -1,39 +1,52 @@
-import { Injectable, Logger, LoggerService } from '@nestjs/common'
+import { ConsoleLogger } from '@nestjs/common'
 import * as winston from 'winston'
 
-class MyLoggerService extends Logger implements LoggerService {
+class LoggerService extends ConsoleLogger {
    private readonly logger: winston.Logger
+   private readonly baseFormat: winston.Logform.Format[] = [
+      winston.format.timestamp(),
+      winston.format.simple(),
+      winston.format.printf(({ level, message, timestamp, context }) => {
+         return `[${timestamp}] ${
+            context ? `[${context}]` : ''
+         } ${level} ${message} `
+      })
+   ]
 
-   constructor(private readonly context: string) {
+   constructor(context: string) {
       super(context)
       this.logger = winston.createLogger({
          level: 'info',
-         format: winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.colorize(),
-            winston.format.simple()
-         ),
          transports: [
-            new winston.transports.Console(),
+            new winston.transports.Console({
+               format: winston.format.combine(
+                  winston.format.colorize(),
+                  ...this.baseFormat
+               )
+            }),
             new winston.transports.File({
                dirname: './logs/info',
                filename: 'info.log',
-               level: 'info'
+               level: 'info',
+               format: winston.format.combine(...this.baseFormat)
             }),
             new winston.transports.File({
                dirname: './logs/warn',
                filename: 'warn.log',
-               level: 'warn'
+               level: 'warn',
+               format: winston.format.combine(...this.baseFormat)
             }),
             new winston.transports.File({
                dirname: './logs/debug',
                filename: 'debug.log',
-               level: 'debug'
+               level: 'debug',
+               format: winston.format.combine(...this.baseFormat)
             }),
             new winston.transports.File({
                dirname: './logs/error',
                filename: 'error.log',
-               level: 'error'
+               level: 'error',
+               format: winston.format.combine(...this.baseFormat)
             })
          ]
       })
@@ -56,4 +69,4 @@ class MyLoggerService extends Logger implements LoggerService {
    }
 }
 
-export { MyLoggerService }
+export { LoggerService }

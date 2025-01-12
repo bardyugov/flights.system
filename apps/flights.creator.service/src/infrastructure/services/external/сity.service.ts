@@ -1,5 +1,5 @@
 import { ICityService } from '../../../application/services/city.service'
-import { Inject, Injectable, Logger, Provider } from '@nestjs/common'
+import { Inject, Injectable, Provider } from '@nestjs/common'
 import { CityEntity } from '../../entities/city.entity'
 import {
    CreateCityReq,
@@ -7,6 +7,7 @@ import {
    error,
    InjectServices,
    KafkaResult,
+   LoggerService,
    ok
 } from '@flights.system/shared'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -15,7 +16,7 @@ import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
 @Injectable()
 class CityService implements ICityService {
-   private readonly logger = new Logger(CityService.name)
+   private readonly logger = new LoggerService(CityService.name)
 
    constructor(
       @InjectRepository(CityEntity)

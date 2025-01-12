@@ -1,5 +1,5 @@
 import { LogEntry, logLevel } from 'kafkajs'
-import { Logger } from '@nestjs/common'
+import { ConsoleLogger, Logger } from '@nestjs/common'
 
 enum InjectServices {
    ConsumerService = 'ConsumerService',
@@ -64,7 +64,7 @@ function safelyParseBuffer<T>(buffer: Buffer) {
 
 function initKafkaLogger(
    level: logLevel,
-   logger: Logger
+   logger: ConsoleLogger
 ): (entry: LogEntry) => void {
    return entry => {
       switch (level) {

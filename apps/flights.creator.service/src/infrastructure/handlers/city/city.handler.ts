@@ -1,7 +1,6 @@
 import {
    Controller,
    Inject,
-   Logger,
    OnModuleDestroy,
    OnModuleInit
 } from '@nestjs/common'
@@ -11,13 +10,14 @@ import {
    IConsumerService,
    InjectServices,
    KafkaResult,
+   LoggerService,
    Topic
 } from '@flights.system/shared'
 import { ICityService } from '../../../application/services/city.service'
 
 @Controller()
 class CityHandler implements OnModuleInit, OnModuleDestroy {
-   private readonly logger = new Logger(CityHandler.name)
+   private readonly logger = new LoggerService(CityHandler.name)
 
    constructor(
       @Inject(InjectServices.ConsumerService)
