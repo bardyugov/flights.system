@@ -17,8 +17,6 @@ services:
     container_name: kafka-1
     depends_on:
       - zookeeper
-    env_file:
-      - ./config/.kafka.env
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
@@ -41,8 +39,6 @@ services:
     container_name: kafka-2
     depends_on:
       - zookeeper
-    env_file:
-      - ./config/.kafka.env
     environment:
       - KAFKA_BROKER_ID=2
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
@@ -71,7 +67,7 @@ services:
     networks:
       - shared-network
     env_file:
-      - .env
+      - ./config/.kafka.ui.env
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
@@ -90,8 +86,8 @@ services:
     container_name: kibana
     ports:
       - '5601:5601'
-    env_file:
-      - ./config/.kibana.env
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
     depends_on:
       - elasticsearch
     networks:

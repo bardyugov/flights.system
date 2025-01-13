@@ -6,7 +6,8 @@ import {
    OnModuleInit,
    Post,
    Query,
-   BadRequestException
+   BadRequestException,
+   Body
 } from '@nestjs/common'
 import {
    CreateCityReq,
@@ -17,6 +18,7 @@ import {
    Topic,
    LoggerService
 } from '@flights.system/shared'
+import { ApiOkResponse, ApiBadRequestResponse, ApiBody } from '@nestjs/swagger'
 
 @Controller('/city')
 class CityHandler implements OnModuleInit, OnModuleDestroy {
@@ -27,14 +29,21 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
    ) {}
 
    @Post('/create')
-   async create() {
+   @ApiOkResponse({
+      description: 'New created city'
+   })
+   @ApiBadRequestResponse({
+      description: 'City already exists'
+   })
+   @ApiBody({
+      description: 'Creating city dto',
+      type: CreateCityReq
+   })
+   async create(@Body() dto: CreateCityReq) {
       const subject = await this.producer.produceWithReply<
          CreateCityReq,
          CreatedCityRes
-      >(Topic.CITY_CREATE_TOPIC, {
-         name: 'New City',
-         country: 'New Country'
-      })
+      >(Topic.CITY_CREATE_TOPIC, dto)
       return new Promise(res => subject.subscribe(res))
    }
 
