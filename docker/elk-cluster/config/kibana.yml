@@ -1,7 +1,8 @@
+# To allow connections from remote users, set this parameter to a non-loopback address.
 server.host: "0.0.0.0"
-server.shutdownTimeout: "5s"
-elasticsearch.hosts: [ "http://elasticsearch:9200" ]
 
-elasticsearch.username: "root"
+# The URLs of the Elasticsearch instances to use for all your queries.
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+
+elasticsearch.username: "kibana_user"
 elasticsearch.password: "12345"
-

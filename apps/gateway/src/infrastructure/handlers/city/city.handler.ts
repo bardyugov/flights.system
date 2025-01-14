@@ -44,6 +44,7 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
          CreateCityReq,
          CreatedCityRes
       >(Topic.CITY_CREATE_TOPIC, dto)
+     
       return new Promise(res => subject.subscribe(res))
    }
 

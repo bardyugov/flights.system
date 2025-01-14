@@ -7,16 +7,17 @@ class LoggerService extends ConsoleLogger {
       winston.format.timestamp(),
       winston.format.simple(),
       winston.format.printf(({ level, message, timestamp, context }) => {
-         return `[${timestamp}] ${
-            context ? `[${context}]` : ''
-         } ${level} ${message} `
+         return level === 'info'
+            ? `[${timestamp}] ${
+                 context ? `[${context}]` : ''
+              } ${level} ${message} `
+            : undefined
       })
    ]
 
    constructor(context: string) {
       super(context)
       this.logger = winston.createLogger({
-         level: 'info',
          transports: [
             new winston.transports.Console({
                format: winston.format.combine(
@@ -53,6 +54,7 @@ class LoggerService extends ConsoleLogger {
    }
 
    log(message: string) {
+      console.log('Log level')
       this.logger.info(message, { context: this.context })
    }
 
@@ -61,6 +63,7 @@ class LoggerService extends ConsoleLogger {
    }
 
    debug(message: string) {
+      console.log('Debug level')
       this.logger.debug(message, { context: this.context })
    }
 
