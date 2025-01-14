@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  gateway:
+    container_name: gateway
+    build:
+      context: ../../
+      dockerfile: ./apps/gateway/Dockerfile
+    ports:
+      - '5001:5001'
+    volumes:
+      - ./volumes/logs:/app/logs
+    networks:
+      - shared-network
+
+  logstash:
+    container_name: logstash
+    image: logstash:8.17.0
+    ports:
+      - '9600:9600'
+    volumes:
+      - ./volumes/logs:/logs
+      - ./config/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - gateway
+    networks:
+      - shared-network
+
+networks:
+  shared-network:
+    external: true

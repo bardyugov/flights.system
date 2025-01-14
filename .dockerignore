@@ -1,0 +1,10 @@
+node_modules/
+dist/
+tmp/
+.vscode/
+.idea/
+.github/
+.nx/
+docker/
+.git/
+.DS_Store

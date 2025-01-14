@@ -1,15 +1,22 @@
-type CityCreateReq = {
-    readonly name: string
+import { ApiProperty } from '@nestjs/swagger'
+
+class CreateCityReq {
+   @ApiProperty({ type: 'string', description: 'Name of city' })
+   readonly name: string
+
+   @ApiProperty({ type: 'string', description: 'Country of city' })
+   readonly country: string
+
+   constructor(name: string, country: string) {
+      this.name = name
+      this.country = country
+   }
 }
 
-type CityCreateRes = {
-    readonly id: string
-    readonly name: string
+class CreatedCityRes {
+   readonly name: string
+   readonly country: string
+   readonly createAt: Date
 }
 
-type AirplaneCreateReq = {
-    readonly PID: string
-    readonly name: string
-}
-
-export { CityCreateReq, CityCreateRes, AirplaneCreateReq }
+export { CreateCityReq, CreatedCityRes }
