@@ -2,6 +2,7 @@ import { LoggerService } from '@nestjs/common'
 import * as winston from 'winston'
 import LogstashTransport from 'winston-logstash/lib/winston-logstash-latest'
 import { ConfigService } from '@nestjs/config'
+import { initConfigPath } from '../../utils/utils'
 
 class MyLoggerService implements LoggerService {
   private readonly logger: winston.Logger
@@ -38,6 +39,14 @@ class MyLoggerService implements LoggerService {
         })
       ]
     })
+  }
+
+  static createBootstrapLogger() {
+    const config = new ConfigService({
+      envFile: initConfigPath()
+    })
+
+    return new MyLoggerService('Bootstrap', config)
   }
 
   log(message: string, data?: { context?: string, trace: string }) {

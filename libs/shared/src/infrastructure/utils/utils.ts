@@ -1,6 +1,7 @@
 import { LogEntry, logLevel } from 'kafkajs'
 import { Request } from 'express'
 import { LoggerService } from '@nestjs/common'
+import * as path from 'path'
 
 enum InjectServices {
   ConsumerService = 'ConsumerService',
@@ -99,6 +100,13 @@ function initKafkaLogger(
   }
 }
 
+function initConfigPath() {
+  return path.join(
+    __dirname,
+    `./assets/.${process.env.NODE_ENV}.env`
+  )
+}
+
 export {
   InjectServices,
   parseArrayFromConfig,
@@ -109,5 +117,6 @@ export {
   ok,
   error,
   RequestTrace,
-  KafkaRequest
+  KafkaRequest,
+  initConfigPath
 }

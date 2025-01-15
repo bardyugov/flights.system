@@ -1,10 +1,7 @@
-import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { CoreModule } from './core/core.module'
 import { MyLoggerService } from '@flights.system/shared'
-import { ConfigService } from '@nestjs/config'
-import path from 'path'
 
 function configureSwagger() {
   return new DocumentBuilder()
@@ -16,20 +13,14 @@ function configureSwagger() {
 }
 
 async function bootstrap() {
+  const logger = MyLoggerService.createBootstrapLogger()
   const app = await NestFactory.create(CoreModule, {
-    logger: new MyLoggerService('Bootstrap', new ConfigService({
-      envFilePath: path.join(
-        __dirname,
-        `./assets/.${process.env.NODE_ENV}.env`
-      )
-    }))
+    logger
   })
 
-  const logger = app.get(MyLoggerService)
   const globalPrefix = 'api'
 
   app.setGlobalPrefix(globalPrefix)
-  app.useLogger(logger)
 
   const port = process.env.PORT
 
@@ -42,7 +33,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, documentFactory)
 
   await app.listen(port)
-  Logger.log(
+  logger.log(
     `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
   )
 }
