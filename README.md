@@ -53,6 +53,6 @@ http://0.0.0.0:5601
 ## Elastic-search uri
 
 ```sh
-http://locahost:9200
+http://localhost:9200
 ```
 
