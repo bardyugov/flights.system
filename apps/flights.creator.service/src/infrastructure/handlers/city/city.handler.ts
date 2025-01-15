@@ -7,18 +7,17 @@ import {
 import {
    CreateCityReq,
    CreatedCityRes,
+   GetCityReq,
    IConsumerService,
    InjectServices,
+   KafkaRequest,
    KafkaResult,
-   LoggerService,
    Topic
 } from '@flights.system/shared'
 import { ICityService } from '../../../application/services/city.service'
 
 @Controller()
 class CityHandler implements OnModuleInit, OnModuleDestroy {
-   private readonly logger = new LoggerService(CityHandler.name)
-
    constructor(
       @Inject(InjectServices.ConsumerService)
       private readonly consumerService: IConsumerService,
@@ -30,24 +29,24 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
       await this.consumerService.connect()
 
       await this.consumerService.subscribeWithReply<
-         CreateCityReq,
+         KafkaRequest<CreateCityReq>,
          KafkaResult<CreatedCityRes>
       >(
          Topic.CITY_CREATE_TOPIC,
-         async msg => await this.cityService.create(msg)
-      )
-
-      await this.consumerService.subscribeEmptyMsgWithReply<CreatedCityRes[]>(
-         Topic.CITY_GET_TOPIC,
-         async () => this.cityService.getMany(20)
+         async req => await this.cityService.create(req)
       )
 
       await this.consumerService.subscribeWithReply<
-         string,
+         KafkaRequest<GetCityReq>,
+         KafkaResult<CreatedCityRes[]>
+      >(Topic.CITY_GET_TOPIC, async req => await this.cityService.getMany(req))
+
+      await this.consumerService.subscribeWithReply<
+         KafkaRequest<string>,
          KafkaResult<CreatedCityRes>
       >(
          Topic.CITY_FIND_BY_NAME_TOPIC,
-         async msg => await this.cityService.findByName(msg)
+         async req => await this.cityService.findByName(req)
       )
    }
 

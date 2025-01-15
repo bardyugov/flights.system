@@ -1,12 +1,12 @@
 import { Controller, Get } from '@nestjs/common'
 import { AppService } from './app.service'
-import { LoggerService } from '@flights.system/shared'
+import { MyLoggerService } from '@flights.system/shared'
 
 @Controller()
 export class AppController {
    constructor(
       private readonly appService: AppService,
-      private readonly logger: LoggerService
+      private readonly logger: MyLoggerService
    ) {}
 
    @Get()

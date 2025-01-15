@@ -25,6 +25,19 @@ services:
     networks:
       - shared-network
 
+  logstash:
+    container_name: logstash
+    image: logstash:8.17.0
+    ports:
+      - '5500:5500'
+      - '9600:9600'
+    volumes:
+      - ./config/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - elasticsearch
+    networks:
+      - shared-network
+
 networks:
   shared-network:
     external: true

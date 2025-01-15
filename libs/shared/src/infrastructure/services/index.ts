@@ -9,3 +9,4 @@ export * from './kafka/producer/producer.module'
 export * from './kafka/topics/topic'
 
 export * from './logger/logger.service'
+export * from './logger/logger.module'

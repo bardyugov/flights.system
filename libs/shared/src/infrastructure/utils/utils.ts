@@ -1,99 +1,122 @@
 import { LogEntry, logLevel } from 'kafkajs'
-import { ConsoleLogger, Logger } from '@nestjs/common'
+import { Request } from 'express'
+import { LoggerService } from '@nestjs/common'
+import * as path from 'path'
 
 enum InjectServices {
-   ConsumerService = 'ConsumerService',
-   ProducerService = 'ProducerService',
-   CityService = 'CityService'
+  ConsumerService = 'ConsumerService',
+  ProducerService = 'ProducerService',
+  CityService = 'CityService',
+  CityServiceLogger = 'CityServiceLogger',
+  AccumulatorServiceLogger = 'AccumulatorServiceLogger'
 }
 
 type Ok<T> = {
-   state: 'ok'
-   value: T
+  state: 'ok'
+  value: T
 }
 
 type Error = {
-   state: 'error'
-   message: string
+  state: 'error'
+  message: string
 }
 
 function ok<T>(value: T): Ok<T> {
-   return {
-      state: 'ok',
-      value: value
-   }
+  return {
+    state: 'ok',
+    value: value
+  }
 }
 
 function error(msg: string): Error {
-   return {
-      state: 'error',
-      message: msg
-   }
+  return {
+    state: 'error',
+    message: msg
+  }
 }
 
 type KafkaResult<T> = Ok<T> | Error
 
+type KafkaRequest<T> = {
+  data: T
+  traceId: string
+}
+
+interface RequestTrace extends Request {
+  traceId: string
+}
+
 function parseArrayFromConfig(value: string) {
-   if (value === '' || !value) {
-      return []
-   }
-   return value.split(';').map(t => t.trim())
+  if (value === '' || !value) {
+    return []
+  }
+  return value.split(';').map(t => t.trim())
 }
 
 function buildKafkaLogMessage(entry: LogEntry) {
-   return JSON.stringify({
-      level: entry.level,
-      label: entry.label,
-      message: entry.log.message
-   })
+  return JSON.stringify({
+    level: entry.level,
+    label: entry.label,
+    message: entry.log.message
+  })
 }
 
 function buildReplyTopic(topic: string) {
-   return `${topic}.reply`
+  return `${topic}.reply`
 }
 
 function safelyParseBuffer<T>(buffer: Buffer) {
-   try {
-      const stringBuffer = buffer.toString()
-      const value: T = JSON.parse(stringBuffer)
-      return value
-   } catch (e) {
-      return null
-   }
+  try {
+    const stringBuffer = buffer.toString()
+    const value: T = JSON.parse(stringBuffer)
+    return value
+  } catch (e) {
+    return null
+  }
 }
 
 function initKafkaLogger(
-   level: logLevel,
-   logger: ConsoleLogger
+  level: logLevel,
+  logger: LoggerService
 ): (entry: LogEntry) => void {
-   return entry => {
-      switch (level) {
-         case logLevel.ERROR:
-            logger.error(buildKafkaLogMessage(entry))
-            break
-         case logLevel.NOTHING:
-            logger.log(buildKafkaLogMessage(entry))
-            break
-         case logLevel.WARN:
-            logger.warn(buildKafkaLogMessage(entry))
-            break
-         case logLevel.INFO:
-            logger.log(buildKafkaLogMessage(entry))
-            break
-         case logLevel.DEBUG:
-            logger.debug(buildKafkaLogMessage(entry))
-            break
-      }
-   }
+  return entry => {
+    switch (level) {
+      case logLevel.ERROR:
+        logger.error(buildKafkaLogMessage(entry))
+        break
+      case logLevel.NOTHING:
+        logger.log(buildKafkaLogMessage(entry))
+        break
+      case logLevel.WARN:
+        logger.warn(buildKafkaLogMessage(entry))
+        break
+      case logLevel.INFO:
+        logger.log(buildKafkaLogMessage(entry))
+        break
+      case logLevel.DEBUG:
+        logger.debug(buildKafkaLogMessage(entry))
+        break
+    }
+  }
+}
+
+function initConfigPath() {
+  return path.join(
+    __dirname,
+    `./assets/.${process.env.NODE_ENV}.env`
+  )
 }
 
 export {
-   InjectServices,
-   parseArrayFromConfig,
-   initKafkaLogger,
-   buildReplyTopic,
-   safelyParseBuffer,
-   KafkaResult,
-   ok,
-   error
+  InjectServices,
+  parseArrayFromConfig,
+  initKafkaLogger,
+  buildReplyTopic,
+  safelyParseBuffer,
+  KafkaResult,
+  ok,
+  error,
+  RequestTrace,
+  KafkaRequest,
+  initConfigPath
 }
