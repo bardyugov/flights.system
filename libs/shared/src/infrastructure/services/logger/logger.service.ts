@@ -1,65 +1,70 @@
-import { ConsoleLogger } from '@nestjs/common'
+import { LoggerService } from '@nestjs/common'
 import * as winston from 'winston'
 
-class LoggerService extends ConsoleLogger {
-   private readonly logger: winston.Logger
+class MyLoggerService implements LoggerService {
+  private readonly logger: winston.Logger
+  private readonly context: string
 
-   private readonly baseFormat: winston.Logform.Format[] = [
-      winston.format.timestamp(),
-      winston.format.simple(),
-      winston.format.printf(({ level, message, timestamp, context, trace }) => {
-         return `[${timestamp}] ${context ? `[${context}]` : ''} ${
-            trace ? `[${trace}]` : ''
-         } ${level} ${message}`
-      })
-   ]
+  private readonly baseFormat: winston.Logform.Format[] = [
+    winston.format.timestamp(),
+    winston.format.simple(),
+    winston.format.printf(({ level, message, timestamp, context, trace }) => {
+      const strContext = context ? `[${context}]` : ''
+      const strTrace = trace ? `[${trace}]` : ''
+      if (trace) {
+        return `[${timestamp}] ${strContext} ${level} ${strTrace} ${message}`
+      }
 
-   constructor(context: string) {
-      super(context)
-      this.logger = winston.createLogger({
-         transports: [
-            new winston.transports.Console({
-               format: winston.format.combine(
-                  winston.format.colorize(),
-                  ...this.baseFormat
-               )
-            }),
-            this.buildLoggerTransport('debug'),
-            this.buildLoggerTransport('info'),
-            this.buildLoggerTransport('warn'),
-            this.buildLoggerTransport('debug')
-         ]
-      })
-   }
+      return `[${timestamp}] ${strContext} ${level} ${message}`
+    })
+  ]
 
-   private buildLoggerTransport(level: string) {
-      const validateLevel = winston.format(info => {
-         return info.level === level ? info : false
-      })
+  constructor(context: string) {
+    this.context = context
+    this.logger = winston.createLogger({
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.colorize(),
+            ...this.baseFormat
+          )
+        }),
+        this.buildLoggerTransport('debug'),
+        this.buildLoggerTransport('info'),
+        this.buildLoggerTransport('warn'),
+        this.buildLoggerTransport('debug')
+      ]
+    })
+  }
 
-      return new winston.transports.File({
-         dirname: `./logs/${level}`,
-         filename: `${level}.log`,
-         level: level,
-         format: winston.format.combine(validateLevel(), ...this.baseFormat)
-      })
-   }
+  private buildLoggerTransport(level: string) {
+    const validateLevel = winston.format(info => {
+      return info.level === level ? info : false
+    })
 
-   log(message: string, { trace }: { trace?: string }) {
-      this.logger.info(message, { trace, context: this.context })
-   }
+    return new winston.transports.File({
+      dirname: `./logs/${level}`,
+      filename: `${level}.log`,
+      level: level,
+      format: winston.format.combine(validateLevel(), ...this.baseFormat)
+    })
+  }
 
-   error(message: string, trace?: string) {
-      this.logger.error(message, { trace, context: this.context })
-   }
+  log(message: string, data?: { context?: string, trace: string }) {
+    this.logger.info({ message, context: data?.context ?? this.context, trace: data?.trace })
+  }
 
-   debug(message: string, trace?: string) {
-      this.logger.debug(message, { trace, context: this.context })
-   }
+  error(message: string, data?: { context?: string, trace: string }) {
+    this.logger.error({ message, context: data?.context ?? this.context, trace: data?.trace })
+  }
 
-   warn(message: string, trace?: string) {
-      this.logger.warn(message, { trace, context: this.context })
-   }
+  debug(message: string, data?: { context?: string, trace: string }) {
+    this.logger.debug({ message, context: data?.context ?? this.context, trace: data?.trace })
+  }
+
+  warn(message: string, data?: { context?: string, trace: string }) {
+    this.logger.warn({ message, context: data?.context ?? this.context, trace: data?.trace })
+  }
 }
 
-export { LoggerService }
+export { MyLoggerService }

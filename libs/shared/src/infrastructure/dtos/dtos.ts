@@ -20,7 +20,9 @@ class CreatedCityRes {
 }
 
 class GetCityReq {
+  @ApiProperty({ type: 'number', description: 'Offset for getting city' })
   readonly offset: number
+  @ApiProperty({ type: 'number', description: 'Limit for getting city' })
   readonly limit: number
 
   constructor(offset: number, limit: number) {

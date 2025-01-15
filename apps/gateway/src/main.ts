@@ -2,9 +2,7 @@ import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { CoreModule } from './core/core.module'
-import { ConfigService } from '@nestjs/config'
-import { LoggerService } from '@flights.system/shared'
-import { TraceIdMiddleware } from './infrastructure/common/middlewares/traceId.middleware'
+import { MyLoggerService } from '@flights.system/shared'
 
 function configureSwagger() {
   return new DocumentBuilder()
@@ -17,15 +15,18 @@ function configureSwagger() {
 
 async function bootstrap() {
   const app = await NestFactory.create(CoreModule, {
-    logger: new LoggerService('Bootstrap')
+    logger: new MyLoggerService('Bootstrap')
   })
 
-  const config = app.get<ConfigService>(ConfigService)
   const globalPrefix = 'api'
   app.setGlobalPrefix(globalPrefix)
-  app.use(TraceIdMiddleware)
 
-  const port = config.get<number>('PORT') || 3000
+  const port = process.env.PORT
+
+  if (!port) {
+    throw new Error('PORT is required')
+  }
+
   const swagger = configureSwagger()
   const documentFactory = () => SwaggerModule.createDocument(app, swagger)
   SwaggerModule.setup('api', app, documentFactory)

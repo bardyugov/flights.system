@@ -7,7 +7,7 @@ import {
   error, GetCityReq,
   InjectServices, KafkaRequest,
   KafkaResult,
-  LoggerService,
+  MyLoggerService,
   ok
 } from '@flights.system/shared'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -16,7 +16,7 @@ import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
 @Injectable()
 class CityService implements ICityService {
-  private readonly logger = new LoggerService(CityService.name)
+  private readonly logger = new MyLoggerService(CityService.name)
 
   constructor(
     @InjectRepository(CityEntity)
@@ -32,7 +32,7 @@ class CityService implements ICityService {
       }
     })
     if (founded) {
-      this.logger.warn(`City already exists with name ${founded.name}`, req.traceId)
+      this.logger.warn(`City already exists with name ${founded.name}`, { trace: req.traceId })
       return error('City already exists')
     }
 
@@ -40,7 +40,7 @@ class CityService implements ICityService {
       new CityEntity(req.data.name, req.data.country)
     )
 
-    this.logger.log(`Success created city with id: ${createdCity.id}`, req.traceId)
+    this.logger.log(`Success created city with id: ${createdCity.id}`, { trace: req.traceId })
     return ok<CreatedCityRes>({
       name: createdCity.name,
       country: createdCity.country,
@@ -50,7 +50,7 @@ class CityService implements ICityService {
 
   async getMany(req: KafkaRequest<GetCityReq>): Promise<KafkaResult<CreatedCityRes[]>> {
     if (req.data.limit > 20) {
-      this.logger.warn('Invalid limit', req.traceId)
+      this.logger.warn('Invalid limit', { trace: req.traceId })
       return error('Invlid limit')
     }
 
@@ -60,7 +60,7 @@ class CityService implements ICityService {
       return ok<CreatedCityRes[]>(cache)
     }
 
-    const cities = await this.cityRepository.find({ take: req.data.limit })
+    const cities = await this.cityRepository.find({ take: req.data.limit, skip: req.data.offset })
     const citiesRes = cities.map<CreatedCityRes>(c => ({
       name: c.name,
       country: c.country,
@@ -68,7 +68,7 @@ class CityService implements ICityService {
     }))
 
     await this.cacheManager.set('city.many', citiesRes, 10000)
-    this.logger.log('Success get cities from db', req.traceId)
+    this.logger.log('Success get cities from db', { trace: req.traceId })
     return ok<CreatedCityRes[]>(citiesRes)
   }
 
@@ -79,7 +79,7 @@ class CityService implements ICityService {
       .getOne()
 
     if (!foundedCity) {
-      this.logger.warn(`Not found city with name: ${req.data}`, req.traceId)
+      this.logger.warn(`Not found city with name: ${req.data}`, { trace: req.traceId })
       return error('Not found city')
     }
 
