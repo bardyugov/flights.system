@@ -3,13 +3,14 @@ import * as winston from 'winston'
 
 class LoggerService extends ConsoleLogger {
   private readonly logger: winston.Logger
+
   private readonly baseFormat: winston.Logform.Format[] = [
     winston.format.timestamp(),
     winston.format.simple(),
-    winston.format.printf(({ level, message, timestamp, context }) => {
+    winston.format.printf(({ level, message, timestamp, context, trace }) => {
       return `[${timestamp}] ${
         context ? `[${context}]` : ''
-      } ${level} ${message} `
+      } ${trace ? `[${trace}]` : ''} ${level} ${message}`
     })
   ]
 
@@ -44,22 +45,20 @@ class LoggerService extends ConsoleLogger {
     })
   }
 
-  log(message: string) {
-    console.log('Log level')
-    this.logger.info(message, { context: this.context })
+  log(message: string, trace?: string) {
+    this.logger.info(message, { trace, context: this.context })
   }
 
   error(message: string, trace?: string) {
     this.logger.error(message, { trace, context: this.context })
   }
 
-  debug(message: string) {
-    console.log('Debug level')
-    this.logger.debug(message, { context: this.context })
+  debug(message: string, trace?: string) {
+    this.logger.debug(message, { trace, context: this.context })
   }
 
-  warn(message: string) {
-    this.logger.warn(message, { context: this.context })
+  warn(message: string, trace?: string) {
+    this.logger.warn(message, { trace, context: this.context })
   }
 }
 

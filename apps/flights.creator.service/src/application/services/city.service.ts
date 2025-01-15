@@ -1,13 +1,16 @@
 import {
-   CreateCityReq,
-   CreatedCityRes,
-   KafkaResult
+  CreateCityReq,
+  CreatedCityRes, KafkaRequest,
+  KafkaResult,
+  GetCityReq
 } from '@flights.system/shared'
 
 interface ICityService {
-   create(city: CreateCityReq): Promise<KafkaResult<CreatedCityRes>>
-   getMany(limit: number): Promise<CreatedCityRes[]>
-   findByName(name: string): Promise<KafkaResult<CreatedCityRes>>
+  create(city: KafkaRequest<CreateCityReq>): Promise<KafkaResult<CreatedCityRes>>
+
+  getMany(limit: KafkaRequest<GetCityReq>): Promise<KafkaResult<CreatedCityRes[]>>
+
+  findByName(name: KafkaRequest<string>): Promise<KafkaResult<CreatedCityRes>>
 }
 
 export { ICityService }
