@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config'
 import path from 'path'
 import { CityModule } from '../infrastructure/handlers/city/city.module'
 import { TraceIdMiddleware } from '../infrastructure/common/middlewares/traceId.middleware'
+import { MyLoggerModule } from '@flights.system/shared'
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { TraceIdMiddleware } from '../infrastructure/common/middlewares/traceId.
         `./assets/.${process.env.NODE_ENV}.env`
       )
     }),
-    CityModule
+    CityModule,
+    MyLoggerModule.register('Bootstrap')
   ]
 })
 class CoreModule implements NestModule {

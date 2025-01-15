@@ -30,6 +30,7 @@ class MyLoggerService implements LoggerService {
         new LogstashTransport({
           host: config.get<string>('LOGSTASH_HOST'),
           port: config.get<string>('LOGSTASH_PORT'),
+          max_connect_retries: -1,
           format: winston.format.combine(
             winston.format.timestamp(),
             winston.format.simple()
