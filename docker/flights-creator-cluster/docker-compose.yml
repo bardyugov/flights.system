@@ -8,7 +8,7 @@ services:
     ports:
       - '5432:5432'
     env_file:
-      - .env
+      - ./config/.env
     volumes:
       - ./volumes/postgres-data:/var/lib/postgresql/data
     networks:
@@ -36,8 +36,23 @@ services:
     depends_on:
       - postgres
       - redis
+    volumes:
+     - ./volumes/logs:/app/logs
     ports:
       - '3000:3000'
+    networks:
+      - shared-network
+
+  logstash:
+    container_name: logstash-flights.creator.service
+    image: logstash:8.17.0
+    ports:
+      - '9601:9600'
+    volumes:
+      - ./volumes/logs:/logs
+      - ./config/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - flights.creator.service
     networks:
       - shared-network
 

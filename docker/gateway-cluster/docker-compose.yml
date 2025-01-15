@@ -14,7 +14,7 @@ services:
       - shared-network
 
   logstash:
-    container_name: logstash
+    container_name: logstash-gateway
     image: logstash:8.17.0
     ports:
       - '9600:9600'
