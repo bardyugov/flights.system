@@ -16,12 +16,13 @@ import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
 @Injectable()
 class CityService implements ICityService {
-  private readonly logger = new MyLoggerService(CityService.name)
 
   constructor(
     @InjectRepository(CityEntity)
     private readonly cityRepository: Repository<CityEntity>,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    @Inject(InjectServices.CityServiceLogger)
+    private readonly logger: MyLoggerService
   ) {
   }
 
@@ -96,4 +97,4 @@ const CityProvider: Provider = {
   useClass: CityService
 }
 
-export { CityProvider }
+export { CityProvider, CityService }

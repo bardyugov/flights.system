@@ -5,7 +5,9 @@ import { LoggerService } from '@nestjs/common'
 enum InjectServices {
   ConsumerService = 'ConsumerService',
   ProducerService = 'ProducerService',
-  CityService = 'CityService'
+  CityService = 'CityService',
+  CityServiceLogger = 'CityServiceLogger',
+  AccumulatorServiceLogger = 'AccumulatorServiceLogger'
 }
 
 type Ok<T> = {

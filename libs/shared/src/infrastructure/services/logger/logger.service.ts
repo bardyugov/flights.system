@@ -1,52 +1,41 @@
 import { LoggerService } from '@nestjs/common'
 import * as winston from 'winston'
+import LogstashTransport from 'winston-logstash/lib/winston-logstash-latest'
+import { ConfigService } from '@nestjs/config'
 
 class MyLoggerService implements LoggerService {
   private readonly logger: winston.Logger
   private readonly context: string
 
-  private readonly baseFormat: winston.Logform.Format[] = [
-    winston.format.timestamp(),
-    winston.format.simple(),
-    winston.format.printf(({ level, message, timestamp, context, trace }) => {
-      const strContext = context ? `[${context}]` : ''
-      const strTrace = trace ? `[${trace}]` : ''
-      if (trace) {
-        return `[${timestamp}] ${strContext} ${level} ${strTrace} ${message}`
-      }
-
-      return `[${timestamp}] ${strContext} ${level} ${message}`
-    })
-  ]
-
-  constructor(context: string) {
+  constructor(context: string, config: ConfigService) {
     this.context = context
     this.logger = winston.createLogger({
       transports: [
         new winston.transports.Console({
           format: winston.format.combine(
             winston.format.colorize(),
-            ...this.baseFormat
+            winston.format.timestamp(),
+            winston.format.simple(),
+            winston.format.printf(({ level, message, timestamp, context, trace }) => {
+              const strContext = context ? `[${context}]` : ''
+              const strTrace = trace ? `[${trace}]` : ''
+              if (trace) {
+                return `[${timestamp}] ${strContext} ${level} ${strTrace} ${message}`
+              }
+
+              return `[${timestamp}] ${strContext} ${level} ${message}`
+            })
           )
         }),
-        this.buildLoggerTransport('debug'),
-        this.buildLoggerTransport('info'),
-        this.buildLoggerTransport('warn'),
-        this.buildLoggerTransport('debug')
+        new LogstashTransport({
+          host: config.get<string>('LOGSTASH_HOST'),
+          port: config.get<string>('LOGSTASH_PORT'),
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.simple()
+          )
+        })
       ]
-    })
-  }
-
-  private buildLoggerTransport(level: string) {
-    const validateLevel = winston.format(info => {
-      return info.level === level ? info : false
-    })
-
-    return new winston.transports.File({
-      dirname: `./logs/${level}`,
-      filename: `${level}.log`,
-      level: level,
-      format: winston.format.combine(validateLevel(), ...this.baseFormat)
     })
   }
 

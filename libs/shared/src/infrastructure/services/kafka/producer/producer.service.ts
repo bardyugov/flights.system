@@ -23,9 +23,9 @@ class ProducerService extends ConnectorService implements IProducerService {
   constructor(
     @Inject(forwardRef(() => InjectServices.ConsumerService))
     private readonly consumerService: IConsumerService,
+    logger: MyLoggerService,
     config: ConfigService
   ) {
-    const logger = new MyLoggerService(ProducerService.name)
     const kafka = new Kafka({
       clientId: config.get<string>('CLIENT_ID'),
       brokers: parseArrayFromConfig(config.get<string>('BROKERS')),
@@ -139,4 +139,4 @@ const ProducerProvider: Provider = {
   useClass: ProducerService
 }
 
-export { ProducerProvider }
+export { ProducerProvider, ProducerService }

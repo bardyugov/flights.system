@@ -23,11 +23,10 @@ import { ApiOkResponse, ApiBadRequestResponse, ApiBody } from '@nestjs/swagger'
 
 @Controller('/city')
 class CityHandler implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new MyLoggerService(CityHandler.name)
-
   constructor(
     @Inject(InjectServices.ProducerService)
-    private readonly producer: IProducerService
+    private readonly producer: IProducerService,
+    private readonly logger: MyLoggerService
   ) {
   }
 
