@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { CityProvider, CityService } from './external/сity.service'
-import { DatabaseModule } from '../database/database.module'
+import { DatabaseModule } from '@flights.system/shared'
 import { AccumulatorService } from './internal/accumulator.service'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { CityEntity } from '../entities/city.entity'
@@ -8,10 +8,13 @@ import { CacheModule } from '@nestjs/cache-manager'
 import { ConfigService } from '@nestjs/config'
 import { redisStore } from 'cache-manager-redis-yet'
 import { MyLoggerModule, InjectServices } from '@flights.system/shared'
+import { AirplaneEntity } from '../entities/airplane.entity'
+import { FlightEntity } from '../entities/flight.entity'
+import { AirplaneStatusEntity } from '../entities/airplane.status.entity'
 
 @Module({
   imports: [
-    DatabaseModule,
+    DatabaseModule.register([CityEntity, AirplaneEntity, FlightEntity, AirplaneStatusEntity]),
     TypeOrmModule.forFeature([CityEntity]),
     CacheModule.registerAsync({
       inject: [ConfigService],

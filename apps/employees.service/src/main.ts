@@ -13,7 +13,7 @@ async function bootstrap() {
     throw new Error('PORT is required')
   }
 
-  app.listen(PORT).then(() => logger.log(`🚀 Flights-Creator service is started...`))
+  app.listen(PORT).then(() => logger.log(`🚀 Emploees service is started...`))
 }
 
 bootstrap()

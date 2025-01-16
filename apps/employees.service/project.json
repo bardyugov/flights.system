@@ -1,7 +1,7 @@
 {
-  "name": "flights.creator.service",
+  "name": "employees.service",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/flights.creator.service/src",
+  "sourceRoot": "apps/employees.service/src",
   "projectType": "application",
   "tags": [],
   "targets": {
@@ -28,15 +28,15 @@
         "build"
       ],
       "options": {
-        "buildTarget": "flights.creator.service:build",
+        "buildTarget": "employees.service:build",
         "runBuildTargetDependencies": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "flights.creator.service:build:development"
+          "buildTarget": "employees.service:build:development"
         },
         "production": {
-          "buildTarget": "flights.creator.service:build:production"
+          "buildTarget": "employees.service:build:production"
         }
       }
     },
@@ -44,21 +44,14 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "ts-node --project tsconfig.app.json ../../node_modules/typeorm/cli migration:generate ./src/infrastructure/database/migrations/{args.name} -d ./src/infrastructure/database/database.context.ts",
-        "cwd": "apps/flights.creator.service"
+        "cwd": "apps/employees.service"
       }
     },
     "migrations:apply": {
       "executor": "nx:run-commands",
       "options": {
         "command": "ts-node --project tsconfig.app.json ../../node_modules/typeorm/cli migration:run -d ./src/infrastructure/database/database.context.ts",
-        "cwd": "apps/flights.creator.service"
-      }
-    },
-    "seeds:apply": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "ts-node --project tsconfig.app.json ./src/infrastructure/database/seeds/runner.ts",
-        "cwd": "apps/flights.creator.service"
+        "cwd": "apps/employees.service"
       }
     }
   }
