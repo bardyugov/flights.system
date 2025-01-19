@@ -7,15 +7,14 @@ import { es, Faker } from '@faker-js/faker'
 
 @Injectable()
 class AirplaneService implements IAirplaneService {
-  private readonly faker = new Faker({ locale: [es] })
+   private readonly faker = new Faker({ locale: [es] })
 
-  constructor(
-    @InjectRepository(AirplaneService)
-    private readonly airplaneRepo: Repository<AirplaneEntity>
-  ) {
-  }
+   constructor(
+      @InjectRepository(AirplaneService)
+      private readonly airplaneRepo: Repository<AirplaneEntity>
+   ) {}
 
-  get(count: number): Promise<GetAirplanesRes> {
-    const randomAirp
-  }
+   get(count: number): Promise<GetAirplanesRes> {
+      const randomAirp
+   }
 }

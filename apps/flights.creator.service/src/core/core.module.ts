@@ -5,16 +5,15 @@ import { ServicesModule } from '../infrastructure/services/services.module'
 import { initConfigPath } from '@flights.system/shared'
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: initConfigPath()
-    }),
-    CityModuleHandler,
-    ServicesModule
-  ]
+   imports: [
+      ConfigModule.forRoot({
+         isGlobal: true,
+         envFilePath: initConfigPath()
+      }),
+      CityModuleHandler,
+      ServicesModule
+   ]
 })
-class CoreModule {
-}
+class CoreModule {}
 
 export { CoreModule }

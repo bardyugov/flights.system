@@ -4,14 +4,14 @@ import { ConfigModule } from '@nestjs/config'
 import { initConfigPath } from '@flights.system/shared'
 
 @Module({
-  imports: [
-    AuthModuleHandler,
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: initConfigPath()
-    })]
+   imports: [
+      AuthModuleHandler,
+      ConfigModule.forRoot({
+         isGlobal: true,
+         envFilePath: initConfigPath()
+      })
+   ]
 })
-class CoreModule {
-}
+class CoreModule {}
 
 export { CoreModule }

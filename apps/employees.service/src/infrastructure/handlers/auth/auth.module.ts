@@ -4,8 +4,7 @@ import { ConsumerModule } from '@flights.system/shared'
 import { ServicesModule } from '../../services/services.module'
 
 @Module({
-  imports: [ConsumerModule, ServicesModule],
-  controllers: [AuthHandler]
+   imports: [ConsumerModule, ServicesModule],
+   controllers: [AuthHandler]
 })
-export class AuthModuleHandler {
-}
+export class AuthModuleHandler {}

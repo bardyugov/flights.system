@@ -6,21 +6,19 @@ import { initConfigPath } from '@flights.system/shared'
 import { AuthModuleHandler } from '../infrastructure/handlers/auth/auth.module'
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: initConfigPath()
-    }),
-    CityModuleHandler,
-    AuthModuleHandler
-  ]
+   imports: [
+      ConfigModule.forRoot({
+         isGlobal: true,
+         envFilePath: initConfigPath()
+      }),
+      CityModuleHandler,
+      AuthModuleHandler
+   ]
 })
 class CoreModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(TraceIdMiddleware)
-      .forRoutes('*')
-  }
+   configure(consumer: MiddlewareConsumer) {
+      consumer.apply(TraceIdMiddleware).forRoutes('*')
+   }
 }
 
 export { CoreModule }

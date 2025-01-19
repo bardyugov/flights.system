@@ -5,14 +5,14 @@ import { RequestTrace } from '@flights.system/shared'
 
 @Injectable()
 class TraceIdMiddleware implements NestMiddleware {
-  use(req: RequestTrace, res: Response, next: () => void): void {
-    const traceId = v4()
+   use(req: RequestTrace, res: Response, next: () => void): void {
+      const traceId = v4()
 
-    req.traceId = traceId
-    res.setHeader('X-Trace-Id', traceId)
+      req.traceId = traceId
+      res.setHeader('X-Trace-Id', traceId)
 
-    next()
-  }
+      next()
+   }
 }
 
 export { TraceIdMiddleware }

@@ -12,32 +12,36 @@ import { AirplaneEntity } from '../entities/airplane.entity'
 import { FlightEntity } from '../entities/flight.entity'
 import { AirplaneStatusEntity } from '../entities/airplane.status.entity'
 
-const entities = [CityEntity, AirplaneEntity, FlightEntity, AirplaneStatusEntity]
+const entities = [
+   CityEntity,
+   AirplaneEntity,
+   FlightEntity,
+   AirplaneStatusEntity
+]
 
 @Module({
-  imports: [
-    DatabaseModule.register(entities),
-    TypeOrmModule.forFeature(entities),
-    CacheModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: async (config: ConfigService) => ({
-        store: await redisStore({
-          username: config.get<string>('REDIS_USERNAME'),
-          password: config.get<string>('REDIS_PASSWORD'),
-          socket: {
-            port: config.get<number>('REDIS_PORT'),
-            host: config.get<string>('REDIS_HOST')
-          }
-        })
-      })
-    }),
-    MyLoggerModule.register(AccumulatorService.name),
-    MyLoggerModule.register(CityService.name)
-  ],
-  providers: [CityProvider, AccumulatorService],
-  exports: [CityProvider]
+   imports: [
+      DatabaseModule.register(entities),
+      TypeOrmModule.forFeature(entities),
+      CacheModule.registerAsync({
+         inject: [ConfigService],
+         useFactory: async (config: ConfigService) => ({
+            store: await redisStore({
+               username: config.get<string>('REDIS_USERNAME'),
+               password: config.get<string>('REDIS_PASSWORD'),
+               socket: {
+                  port: config.get<number>('REDIS_PORT'),
+                  host: config.get<string>('REDIS_HOST')
+               }
+            })
+         })
+      }),
+      MyLoggerModule.register(AccumulatorService.name),
+      MyLoggerModule.register(CityService.name)
+   ],
+   providers: [CityProvider, AccumulatorService],
+   exports: [CityProvider]
 })
-class ServicesModule {
-}
+class ServicesModule {}
 
 export { ServicesModule }

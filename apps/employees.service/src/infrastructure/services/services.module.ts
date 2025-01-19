@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common'
-import { DatabaseModule, InjectServices, MyLoggerModule } from '@flights.system/shared'
+import {
+   DatabaseModule,
+   InjectServices,
+   MyLoggerModule
+} from '@flights.system/shared'
 import { EmployeeEntity } from '../entities/employee.entity'
 import { EmployeeStatusEntity } from '../entities/employee.status.entity'
 import { QualificationEntity } from '../entities/qulification.entity'
@@ -10,25 +14,23 @@ import { JwtService } from './internal/jwt.service'
 import { JwtModule } from '@nestjs/jwt'
 import { BcryptService } from './internal/bcrypt.service'
 
-const entities = [EmployeeEntity, EmployeeStatusEntity, QualificationEntity, ClientEntity]
+const entities = [
+   EmployeeEntity,
+   EmployeeStatusEntity,
+   QualificationEntity,
+   ClientEntity
+]
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature(entities),
-    DatabaseModule.register(entities),
-    JwtModule.register({}),
-    MyLoggerModule.register(AuthService.name)
-  ],
-  providers: [
-    AuthServiceProvider,
-    JwtService,
-    BcryptService
-  ],
-  exports: [
-    AuthServiceProvider
-  ]
+   imports: [
+      TypeOrmModule.forFeature(entities),
+      DatabaseModule.register(entities),
+      JwtModule.register({}),
+      MyLoggerModule.register(AuthService.name)
+   ],
+   providers: [AuthServiceProvider, JwtService, BcryptService],
+   exports: [AuthServiceProvider]
 })
-class ServicesModule {
-}
+class ServicesModule {}
 
 export { ServicesModule }

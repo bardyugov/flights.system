@@ -6,40 +6,40 @@ import { ZodFilter } from './infrastructure/common/filters/zod.filter'
 import { ZodValidationPipe } from 'nestjs-zod'
 
 function configureSwagger() {
-  return new DocumentBuilder()
-    .setTitle('Flights api gateway')
-    .setDescription('Flights gateway description')
-    .setVersion('1.0')
-    .addTag('api')
-    .build()
+   return new DocumentBuilder()
+      .setTitle('Flights api gateway')
+      .setDescription('Flights gateway description')
+      .setVersion('1.0')
+      .addTag('api')
+      .build()
 }
 
 async function bootstrap() {
-  const logger = MyLoggerService.createBootstrapLogger()
-  const app = await NestFactory.create(CoreModule, {
-    logger
-  })
+   const logger = MyLoggerService.createBootstrapLogger()
+   const app = await NestFactory.create(CoreModule, {
+      logger
+   })
 
-  const globalPrefix = 'api'
+   const globalPrefix = 'api'
 
-  app.setGlobalPrefix(globalPrefix)
-  app.useGlobalPipes(new ZodValidationPipe())
-  app.useGlobalFilters(new ZodFilter())
+   app.setGlobalPrefix(globalPrefix)
+   app.useGlobalPipes(new ZodValidationPipe())
+   app.useGlobalFilters(new ZodFilter())
 
-  const port = process.env.PORT
+   const port = process.env.PORT
 
-  if (!port) {
-    throw new Error('PORT is required')
-  }
+   if (!port) {
+      throw new Error('PORT is required')
+   }
 
-  const swagger = configureSwagger()
-  const documentFactory = () => SwaggerModule.createDocument(app, swagger)
-  SwaggerModule.setup('api', app, documentFactory)
+   const swagger = configureSwagger()
+   const documentFactory = () => SwaggerModule.createDocument(app, swagger)
+   SwaggerModule.setup('api', app, documentFactory)
 
-  await app.listen(port)
-  logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
-  )
+   await app.listen(port)
+   logger.log(
+      `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
+   )
 }
 
 bootstrap()
