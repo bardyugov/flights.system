@@ -7,10 +7,17 @@ const createCityReqCred = z.object({
   country: z.string().min(5, 'Country length > 5')
 })
 
-
 const getCityReqCred = z.object({
   offset: z.number().gt(1, 'Offset must be > 1'),
   limit: z.number().gte(20, 'Limit must bet <= 20')
+})
+
+const registerEmployeeReqCred = z.object({
+  name: z.string().min(5).max(23),
+  surname: z.string().min(5).max(23),
+  lastName: z.string().min(5).max(23),
+  birthDate: z.date(),
+  password: z.string().min(5).max(23)
 })
 
 class CreateCityReq extends createZodDto(createCityReqCred) {
@@ -40,7 +47,25 @@ class GetCityReq extends createZodDto(getCityReqCred) {
   }
 }
 
+class RegisterEmployeeReq extends createZodDto(registerEmployeeReqCred) {
+  @ApiProperty({ type: 'string', description: 'Employee name' })
+  name: string
+
+  @ApiProperty({ type: 'string', description: 'Employee surname' })
+  surname: string
+
+  @ApiProperty({ type: 'string', description: 'Employee lastName' })
+  lastName: string
+
+  @ApiProperty({ type: 'string', description: 'Employee birthDate', example: new Date() })
+  birthDate: Date
+
+  @ApiProperty({ type: 'string', description: 'Employee password', example: new Date() })
+  password: string
+}
+
 export {
   CreateCityReq,
-  GetCityReq
+  GetCityReq,
+  RegisterEmployeeReq
 }
