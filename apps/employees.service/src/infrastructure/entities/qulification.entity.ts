@@ -7,13 +7,15 @@ class QualificationEntity {
 
    @Column({
       name: 'name',
-      nullable: false
+      nullable: false,
+      unique: true
    })
    name: string
 
    @Column({
       name: 'airplane_id',
-      nullable: false
+      nullable: false,
+      unique: true
    })
    airplaneId: number
 

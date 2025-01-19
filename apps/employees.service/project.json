@@ -53,6 +53,13 @@
         "command": "ts-node --project tsconfig.app.json ../../node_modules/typeorm/cli migration:run -d ./src/infrastructure/database/database.context.ts",
         "cwd": "apps/employees.service"
       }
+    },
+    "seeds:apply": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "ts-node --project tsconfig.app.json ./src/infrastructure/database/seeds/runner.ts",
+        "cwd": "apps/employees.service"
+      }
     }
   }
 }

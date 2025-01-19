@@ -8,8 +8,11 @@ enum Topic {
    CITY_FIND_BY_NAME_TOPIC = 'city.find.topic',
    CITY_FIND_BY_NAME_TOPIC_REPLY = 'city.find.topic.reply',
 
-   AUTH_REGISTER_EMPLOYEE = 'auth.register.employee',
-   AUTH_REGISTER_EMPLOYEE_REPLY = 'auth.register.employee.reply'
+   AUTH_REGISTER_EMPLOYEE = 'auth.register.employee.topic',
+   AUTH_REGISTER_EMPLOYEE_REPLY = 'auth.register.employee.topic.reply',
+
+   AIRPLANE_GET_TOPIC = 'airplane.get.topic',
+   AIRPLANE_GET_TOPIC_REPLY = 'airplane.get.topic.reply'
 }
 
 export { Topic }

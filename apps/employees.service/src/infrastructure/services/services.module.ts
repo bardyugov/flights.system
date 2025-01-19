@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 import {
    DatabaseModule,
-   InjectServices,
-   MyLoggerModule
+   MyLoggerModule,
+   ProducerModule
 } from '@flights.system/shared'
 import { EmployeeEntity } from '../entities/employee.entity'
 import { EmployeeStatusEntity } from '../entities/employee.status.entity'
@@ -26,7 +26,8 @@ const entities = [
       TypeOrmModule.forFeature(entities),
       DatabaseModule.register(entities),
       JwtModule.register({}),
-      MyLoggerModule.register(AuthService.name)
+      MyLoggerModule.register(AuthService.name),
+      ProducerModule
    ],
    providers: [AuthServiceProvider, JwtService, BcryptService],
    exports: [AuthServiceProvider]

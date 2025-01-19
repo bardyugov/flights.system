@@ -5,7 +5,8 @@ import {
    ManyToOne,
    ManyToMany,
    JoinTable,
-   Check
+   Check,
+   JoinColumn
 } from 'typeorm'
 import { EmployeeStatusEntity } from './employee.status.entity'
 import { QualificationEntity } from './qulification.entity'
@@ -46,11 +47,18 @@ class EmployeeEntity {
 
    @Column({
       name: 'flights_hours',
-      nullable: false
+      nullable: false,
+      default: 0
    })
    flightsHours: number
 
-   @ManyToOne(() => EmployeeStatusEntity, entity => entity.employees)
+   @ManyToOne(() => EmployeeStatusEntity, entity => entity.employees, {
+      nullable: false
+   })
+   @JoinColumn({
+      name: 'status_id',
+      referencedColumnName: 'id'
+   })
    status: EmployeeStatusEntity
 
    @Column({

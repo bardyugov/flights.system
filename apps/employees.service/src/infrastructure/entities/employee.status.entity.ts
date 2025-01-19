@@ -31,6 +31,10 @@ class EmployeeStatusEntity {
 
    @OneToMany(() => EmployeeEntity, entity => entity.status)
    employees: EmployeeEntity[]
+
+   constructor(status: EmployeeStatusEnum) {
+      this.status = status
+   }
 }
 
 export { EmployeeStatusEntity, EmployeeStatusEnum }

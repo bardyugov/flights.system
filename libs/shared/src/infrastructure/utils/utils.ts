@@ -8,7 +8,8 @@ enum InjectServices {
    ConsumerService = 'IConsumerService',
    ProducerService = 'IProducerService',
    CityService = 'ICityService',
-   AuthService = 'IAuthService'
+   AuthService = 'IAuthService',
+   AirplaneService = 'IAirplaneService'
 }
 
 type GlobalRole = EmployeeRole | 'client'

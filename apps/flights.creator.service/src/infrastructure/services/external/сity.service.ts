@@ -107,9 +107,9 @@ class CityService implements ICityService {
    }
 }
 
-const CityProvider: Provider = {
+const CityServiceProvider: Provider = {
    provide: InjectServices.CityService,
    useClass: CityService
 }
 
-export { CityProvider, CityService }
+export { CityServiceProvider, CityService }

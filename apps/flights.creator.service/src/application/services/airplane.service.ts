@@ -1,7 +1,11 @@
-import { GetAirplanesRes } from '@flights.system/shared'
+import {
+   GetAirplanesRes,
+   KafkaRequest,
+   KafkaResult
+} from '@flights.system/shared'
 
 interface IAirplaneService {
-   get(count: number): Promise<GetAirplanesRes>
+   get(req: KafkaRequest<number>): Promise<KafkaResult<GetAirplanesRes[]>>
 }
 
 export { IAirplaneService }

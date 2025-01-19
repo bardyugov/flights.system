@@ -11,7 +11,7 @@ class AuthTokenRes {
 
 class GetAirplanesRes {
    readonly id: number
-   readonly PID: number
+   readonly pid: number
 }
 
 export { CreatedCityRes, AuthTokenRes, GetAirplanesRes }

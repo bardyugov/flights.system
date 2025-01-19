@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { CityProvider, CityService } from './external/сity.service'
+import { CityServiceProvider, CityService } from './external/сity.service'
 import { DatabaseModule } from '@flights.system/shared'
 import { AccumulatorService } from './internal/accumulator.service'
 import { TypeOrmModule } from '@nestjs/typeorm'
@@ -7,10 +7,14 @@ import { CityEntity } from '../entities/city.entity'
 import { CacheModule } from '@nestjs/cache-manager'
 import { ConfigService } from '@nestjs/config'
 import { redisStore } from 'cache-manager-redis-yet'
-import { MyLoggerModule, InjectServices } from '@flights.system/shared'
+import { MyLoggerModule } from '@flights.system/shared'
 import { AirplaneEntity } from '../entities/airplane.entity'
 import { FlightEntity } from '../entities/flight.entity'
 import { AirplaneStatusEntity } from '../entities/airplane.status.entity'
+import {
+   AirplaneService,
+   AirplaneServiceProvider
+} from './external/airplane.service'
 
 const entities = [
    CityEntity,
@@ -37,10 +41,16 @@ const entities = [
          })
       }),
       MyLoggerModule.register(AccumulatorService.name),
-      MyLoggerModule.register(CityService.name)
+      MyLoggerModule.register(CityService.name),
+      MyLoggerModule.register(AirplaneService.name)
    ],
-   providers: [CityProvider, AccumulatorService],
-   exports: [CityProvider]
+   providers: [
+      CityServiceProvider,
+      AirplaneServiceProvider,
+      AccumulatorService,
+      AirplaneService
+   ],
+   exports: [CityServiceProvider, AirplaneServiceProvider]
 })
 class ServicesModule {}
 

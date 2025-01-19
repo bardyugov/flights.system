@@ -1,6 +1,6 @@
 import {
-   Controller,
    Inject,
+   Injectable,
    OnModuleDestroy,
    OnModuleInit
 } from '@nestjs/common'
@@ -16,7 +16,7 @@ import {
 } from '@flights.system/shared'
 import { ICityService } from '../../../application/services/city.service'
 
-@Controller()
+@Injectable()
 class CityHandler implements OnModuleInit, OnModuleDestroy {
    constructor(
       @Inject(InjectServices.ConsumerService)
