@@ -8,12 +8,13 @@ async function bootstrap() {
     logger
   })
 
-  const PORT = process.env.PORT
-  if (!PORT) {
+  const port = process.env.PORT
+  if (!port) {
     throw new Error('PORT is required')
   }
 
-  app.listen(PORT).then(() => logger.log(`🚀 Emploees service is started...`))
+  await app.listen(port)
+  logger.log(`🚀 Emploees service is started...`)
 }
 
 bootstrap()

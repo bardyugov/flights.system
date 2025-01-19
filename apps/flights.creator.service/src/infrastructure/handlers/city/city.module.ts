@@ -7,7 +7,7 @@ import { ServicesModule } from '../../services/services.module'
   imports: [ConsumerModule, ServicesModule],
   controllers: [CityHandler]
 })
-class HelloModule {
+class CityModuleHandler {
 }
 
-export { HelloModule }
+export { CityModuleHandler }

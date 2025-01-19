@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { HelloModule } from '../infrastructure/handlers/city/city.module'
+import { CityModuleHandler } from '../infrastructure/handlers/city/city.module'
 import { ServicesModule } from '../infrastructure/services/services.module'
 import { initConfigPath } from '@flights.system/shared'
 
@@ -10,7 +10,7 @@ import { initConfigPath } from '@flights.system/shared'
       isGlobal: true,
       envFilePath: initConfigPath()
     }),
-    HelloModule,
+    CityModuleHandler,
     ServicesModule
   ]
 })

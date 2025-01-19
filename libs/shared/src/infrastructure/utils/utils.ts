@@ -46,6 +46,10 @@ interface RequestTrace extends Request {
   traceId: string
 }
 
+type ValidationResult = {
+  [key: number]: string
+}
+
 function parseArrayFromConfig(value: string) {
   if (value === '' || !value) {
     return []
@@ -114,5 +118,6 @@ export {
   error,
   RequestTrace,
   KafkaRequest,
-  initConfigPath
+  initConfigPath,
+  ValidationResult
 }

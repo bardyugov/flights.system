@@ -6,7 +6,7 @@ import { ConsumerModule, ProducerModule, MyLoggerModule } from '@flights.system/
   imports: [ProducerModule, ConsumerModule, MyLoggerModule.register(CityHandler.name)],
   controllers: [CityHandler]
 })
-class CityModule {
+class CityModuleHandler {
 }
 
-export { CityModule }
+export { CityModuleHandler }

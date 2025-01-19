@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { CoreModule } from './core/core.module'
 import { MyLoggerService } from '@flights.system/shared'
+import { ZodFilter } from './infrastructure/common/filters/zod.filter'
+import { ZodValidationPipe } from 'nestjs-zod'
 
 function configureSwagger() {
   return new DocumentBuilder()
@@ -21,6 +23,8 @@ async function bootstrap() {
   const globalPrefix = 'api'
 
   app.setGlobalPrefix(globalPrefix)
+  app.useGlobalPipes(new ZodValidationPipe())
+  app.useGlobalFilters(new ZodFilter())
 
   const port = process.env.PORT
 
