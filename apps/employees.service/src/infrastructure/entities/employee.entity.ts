@@ -49,12 +49,11 @@ class EmployeeEntity {
     name: 'type',
     type: 'enum',
     nullable: false,
-    enum: EmployeeTypeEnum,
-    unique: true
+    enum: EmployeeTypeEnum
   })
   type: EmployeeTypeEnum
 
-  @ManyToMany(() => QualificationEntity)
+  @ManyToMany(() => QualificationEntity, {})
   @JoinTable({
     name: 'employee_to_qualification',
     joinColumn: {
@@ -68,6 +67,12 @@ class EmployeeEntity {
   })
   @Check(`"type" = 'pilot'`)
   qualifications: QualificationEntity[]
+
+  @Column({ name: 'password', nullable: false })
+  password: string
+
+  @Column({ name: 'refresh_token', nullable: false })
+  refreshToken: string
 }
 
 export { EmployeeEntity }
