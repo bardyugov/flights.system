@@ -5,10 +5,12 @@ import { EmployeeStatusEntity } from '../entities/employee.status.entity'
 import { QualificationEntity } from '../entities/qulification.entity'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
+const entities = [EmployeeEntity, EmployeeStatusEntity, QualificationEntity]
+
 @Module({
   imports: [
-    TypeOrmModule.forFeature([EmployeeEntity, EmployeeStatusEntity, QualificationEntity]),
-    DatabaseModule.register([EmployeeEntity, EmployeeStatusEntity, QualificationEntity])
+    TypeOrmModule.forFeature(entities),
+    DatabaseModule.register(entities)
   ]
 })
 class ServicesModule {

@@ -54,11 +54,7 @@ function parseArrayFromConfig(value: string) {
 }
 
 function buildKafkaLogMessage(entry: LogEntry) {
-  return JSON.stringify({
-    level: entry.level,
-    label: entry.label,
-    message: entry.log.message
-  })
+  return `${entry.log.message}`
 }
 
 function buildReplyTopic(topic: string) {
