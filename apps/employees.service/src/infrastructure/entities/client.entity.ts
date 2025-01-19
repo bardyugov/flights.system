@@ -47,7 +47,7 @@ class ClientEntity {
   @Column({ name: 'password', nullable: false })
   password: string
 
-  @Column({ name: 'refresh_token', nullable: false })
+  @Column({ name: 'refresh_token', nullable: true })
   refreshToken: string
 }
 

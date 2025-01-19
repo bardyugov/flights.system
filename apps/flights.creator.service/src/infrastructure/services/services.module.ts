@@ -12,10 +12,12 @@ import { AirplaneEntity } from '../entities/airplane.entity'
 import { FlightEntity } from '../entities/flight.entity'
 import { AirplaneStatusEntity } from '../entities/airplane.status.entity'
 
+const entities = [CityEntity, AirplaneEntity, FlightEntity, AirplaneStatusEntity]
+
 @Module({
   imports: [
-    DatabaseModule.register([CityEntity, AirplaneEntity, FlightEntity, AirplaneStatusEntity]),
-    TypeOrmModule.forFeature([CityEntity]),
+    DatabaseModule.register(entities),
+    TypeOrmModule.forFeature(entities),
     CacheModule.registerAsync({
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({

@@ -4,4 +4,9 @@ class CreatedCityRes {
   readonly createAt: Date
 }
 
-export { CreatedCityRes }
+class AuthTokenResponse {
+  readonly access: string
+  readonly refresh: string
+}
+
+export { CreatedCityRes, AuthTokenResponse }

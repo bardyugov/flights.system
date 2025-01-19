@@ -1,16 +1,31 @@
 import { Module } from '@nestjs/common'
-import { DatabaseModule } from '@flights.system/shared'
+import { DatabaseModule, InjectServices, MyLoggerModule } from '@flights.system/shared'
 import { EmployeeEntity } from '../entities/employee.entity'
 import { EmployeeStatusEntity } from '../entities/employee.status.entity'
 import { QualificationEntity } from '../entities/qulification.entity'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { ClientEntity } from '../entities/client.entity'
+import { AuthService, AuthServiceProvider } from './external/auth.service'
+import { JwtService } from './internal/jwt.service'
+import { JwtModule } from '@nestjs/jwt'
+import { BcryptService } from './internal/bcrypt.service'
 
-const entities = [EmployeeEntity, EmployeeStatusEntity, QualificationEntity]
+const entities = [EmployeeEntity, EmployeeStatusEntity, QualificationEntity, ClientEntity]
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(entities),
-    DatabaseModule.register(entities)
+    DatabaseModule.register(entities),
+    JwtModule.register({}),
+    MyLoggerModule.register(AuthService.name, InjectServices.AuthServiceLogger)
+  ],
+  providers: [
+    AuthServiceProvider,
+    JwtService,
+    BcryptService
+  ],
+  exports: [
+    AuthServiceProvider
   ]
 })
 class ServicesModule {

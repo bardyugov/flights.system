@@ -2,14 +2,19 @@ import { LogEntry, logLevel } from 'kafkajs'
 import { Request } from 'express'
 import { LoggerService } from '@nestjs/common'
 import * as path from 'path'
+import { EmployeeRole } from '../dtos'
 
 enum InjectServices {
   ConsumerService = 'ConsumerService',
   ProducerService = 'ProducerService',
   CityService = 'CityService',
   CityServiceLogger = 'CityServiceLogger',
-  AccumulatorServiceLogger = 'AccumulatorServiceLogger'
+  AccumulatorServiceLogger = 'AccumulatorServiceLogger',
+  AuthService = 'AuthService',
+  AuthServiceLogger = 'AuthServiceLogger'
 }
+
+type GlobalRole = EmployeeRole | 'client'
 
 type Ok<T> = {
   state: 'ok'
@@ -48,6 +53,11 @@ interface RequestTrace extends Request {
 
 type ValidationResult = {
   [key: number]: string
+}
+
+type JwtPayload = {
+  id: number
+  role: GlobalRole
 }
 
 function parseArrayFromConfig(value: string) {
@@ -119,5 +129,7 @@ export {
   RequestTrace,
   KafkaRequest,
   initConfigPath,
-  ValidationResult
+  ValidationResult,
+  JwtPayload,
+  GlobalRole
 }

@@ -12,13 +12,18 @@ const getCityReqCred = z.object({
   limit: z.number().gte(20, 'Limit must bet <= 20')
 })
 
+const employeeRole = z.enum(['pilot', 'stewardess'])
+
 const registerEmployeeReqCred = z.object({
   name: z.string().min(5).max(23),
   surname: z.string().min(5).max(23),
   lastName: z.string().min(5).max(23),
   birthDate: z.date(),
-  password: z.string().min(5).max(23)
+  password: z.string().min(5).max(23),
+  role: employeeRole
 })
+
+type EmployeeRole = z.infer<typeof employeeRole>;
 
 class CreateCityReq extends createZodDto(createCityReqCred) {
   @ApiProperty({ type: 'string', description: 'Name of city' })
@@ -62,10 +67,14 @@ class RegisterEmployeeReq extends createZodDto(registerEmployeeReqCred) {
 
   @ApiProperty({ type: 'string', description: 'Employee password', example: new Date() })
   password: string
+
+  @ApiProperty({ type: 'string', description: 'Employee role', example: 'pilot | stewardess | client' })
+  role: EmployeeRole
 }
 
 export {
   CreateCityReq,
   GetCityReq,
-  RegisterEmployeeReq
+  RegisterEmployeeReq,
+  EmployeeRole,
 }
