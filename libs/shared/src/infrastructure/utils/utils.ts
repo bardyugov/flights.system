@@ -5,13 +5,10 @@ import * as path from 'path'
 import { EmployeeRole } from '../dtos'
 
 enum InjectServices {
-  ConsumerService = 'ConsumerService',
-  ProducerService = 'ProducerService',
-  CityService = 'CityService',
-  CityServiceLogger = 'CityServiceLogger',
-  AccumulatorServiceLogger = 'AccumulatorServiceLogger',
-  AuthService = 'AuthService',
-  AuthServiceLogger = 'AuthServiceLogger'
+  ConsumerService = 'IConsumerService',
+  ProducerService = 'IProducerService',
+  CityService = 'ICityService',
+  AuthService = 'IAuthService',
 }
 
 type GlobalRole = EmployeeRole | 'client'

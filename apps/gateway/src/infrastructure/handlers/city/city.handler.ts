@@ -26,6 +26,7 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
   constructor(
     @Inject(InjectServices.ProducerService)
     private readonly producer: IProducerService,
+    @Inject(CityHandler.name)
     private readonly logger: MyLoggerService
   ) {
   }

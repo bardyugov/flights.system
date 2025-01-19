@@ -4,17 +4,17 @@ import { MyLoggerService } from './logger.service'
 
 @Module({})
 class MyLoggerModule {
-  static register(context: string, provide?: string): DynamicModule {
+  static register(context: string): DynamicModule {
     return {
       module: MyLoggerModule,
       providers: [
         {
-          provide: provide ?? MyLoggerService,
+          provide: context,
           useFactory: (config: ConfigService) => new MyLoggerService(context, config),
           inject: [ConfigService]
         }
       ],
-      exports: [provide ?? MyLoggerService]
+      exports: [context]
     }
   }
 }

@@ -1,5 +1,7 @@
 import crypto from 'crypto'
+import { Injectable } from '@nestjs/common'
 
+@Injectable()
 class BcryptService {
   private generateSalt(length: number) {
     return crypto.randomBytes(length).toString('hex')

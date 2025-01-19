@@ -21,7 +21,7 @@ class CityService implements ICityService {
     @InjectRepository(CityEntity)
     private readonly cityRepository: Repository<CityEntity>,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-    @Inject(InjectServices.CityServiceLogger)
+    @Inject(CityService.name)
     private readonly logger: MyLoggerService
   ) {
   }

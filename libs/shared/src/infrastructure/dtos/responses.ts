@@ -4,9 +4,14 @@ class CreatedCityRes {
   readonly createAt: Date
 }
 
-class AuthTokenResponse {
+class AuthTokenRes {
   readonly access: string
   readonly refresh: string
 }
 
-export { CreatedCityRes, AuthTokenResponse }
+class GetAirplanesRes {
+  readonly id: number
+  readonly PID: number
+}
+
+export { CreatedCityRes, AuthTokenRes, GetAirplanesRes }

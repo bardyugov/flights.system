@@ -23,6 +23,7 @@ class ProducerService extends ConnectorService implements IProducerService {
   constructor(
     @Inject(forwardRef(() => InjectServices.ConsumerService))
     private readonly consumerService: IConsumerService,
+    @Inject(ProducerService.name)
     logger: MyLoggerService,
     config: ConfigService
   ) {

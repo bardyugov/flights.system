@@ -24,6 +24,7 @@ class ConsumerService extends ConnectorService implements IConsumerService {
     @Inject(forwardRef(() => InjectServices.ProducerService))
     private readonly producerService: IProducerService,
     config: ConfigService,
+    @Inject(ConsumerService.name)
     logger: MyLoggerService
   ) {
     const kafka = new Kafka({

@@ -6,14 +6,14 @@ import { FlightEntity } from '../../entities/flight.entity'
 import { AirplaneEntity } from '../../entities/airplane.entity'
 import { CityEntity } from '../../entities/city.entity'
 import { FlightInsertQuery } from '../../database/query-types'
-import { InjectServices, MyLoggerService } from '@flights.system/shared'
+import { MyLoggerService } from '@flights.system/shared'
 
 @Injectable()
 class AccumulatorService {
   private readonly faker = new Faker({ locale: [es] })
 
   constructor(
-    @Inject(InjectServices.AccumulatorServiceLogger)
+    @Inject(AccumulatorService.name)
     private readonly logger: MyLoggerService,
     private readonly context: DataSource
   ) {

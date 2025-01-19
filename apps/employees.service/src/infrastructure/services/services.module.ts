@@ -17,7 +17,7 @@ const entities = [EmployeeEntity, EmployeeStatusEntity, QualificationEntity, Cli
     TypeOrmModule.forFeature(entities),
     DatabaseModule.register(entities),
     JwtModule.register({}),
-    MyLoggerModule.register(AuthService.name, InjectServices.AuthServiceLogger)
+    MyLoggerModule.register(AuthService.name)
   ],
   providers: [
     AuthServiceProvider,

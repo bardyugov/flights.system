@@ -73,22 +73,6 @@ class EmployeeEntity {
 
   @Column({ name: 'refresh_token', nullable: true })
   refreshToken: string
-
-  constructor(
-    name: string,
-    surname: string,
-    lastname: string,
-    birthDate: Date,
-    type: EmployeeTypeEnum,
-    password: string
-  ) {
-    this.name = name
-    this.surname = surname
-    this.lastName = lastname
-    this.birthDate = birthDate
-    this.type = type
-    this.password = password
-  }
 }
 
 export { EmployeeEntity, EmployeeTypeEnum }

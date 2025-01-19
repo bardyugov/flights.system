@@ -31,8 +31,8 @@ const entities = [CityEntity, AirplaneEntity, FlightEntity, AirplaneStatusEntity
         })
       })
     }),
-    MyLoggerModule.register(AccumulatorService.name, InjectServices.AccumulatorServiceLogger),
-    MyLoggerModule.register(CityService.name, InjectServices.CityServiceLogger)
+    MyLoggerModule.register(AccumulatorService.name),
+    MyLoggerModule.register(CityService.name)
   ],
   providers: [CityProvider, AccumulatorService],
   exports: [CityProvider]

@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config'
 import { CityModuleHandler } from '../infrastructure/handlers/city/city.module'
 import { TraceIdMiddleware } from '../infrastructure/common/middlewares/traceId.middleware'
 import { initConfigPath } from '@flights.system/shared'
+import { AuthModuleHandler } from '../infrastructure/handlers/auth/auth.module'
 
 @Module({
   imports: [
@@ -10,7 +11,8 @@ import { initConfigPath } from '@flights.system/shared'
       isGlobal: true,
       envFilePath: initConfigPath()
     }),
-    CityModuleHandler
+    CityModuleHandler,
+    AuthModuleHandler
   ]
 })
 class CoreModule implements NestModule {

@@ -18,7 +18,7 @@ const registerEmployeeReqCred = z.object({
   name: z.string().min(5).max(23),
   surname: z.string().min(5).max(23),
   lastName: z.string().min(5).max(23),
-  birthDate: z.date(),
+  birthDate: z.string().datetime().transform(v => new Date(v)),
   password: z.string().min(5).max(23),
   role: employeeRole
 })
@@ -62,10 +62,15 @@ class RegisterEmployeeReq extends createZodDto(registerEmployeeReqCred) {
   @ApiProperty({ type: 'string', description: 'Employee lastName' })
   lastName: string
 
-  @ApiProperty({ type: 'string', description: 'Employee birthDate', example: new Date() })
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+    description: 'Employee birthDate',
+    example: '2023-01-01T00:00:00Z'
+  })
   birthDate: Date
 
-  @ApiProperty({ type: 'string', description: 'Employee password', example: new Date() })
+  @ApiProperty({ type: 'string', description: 'Employee password' })
   password: string
 
   @ApiProperty({ type: 'string', description: 'Employee role', example: 'pilot | stewardess | client' })
@@ -76,5 +81,5 @@ export {
   CreateCityReq,
   GetCityReq,
   RegisterEmployeeReq,
-  EmployeeRole,
+  EmployeeRole
 }
