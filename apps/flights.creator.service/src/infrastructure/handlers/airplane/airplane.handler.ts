@@ -11,6 +11,7 @@ import {
    InjectServices,
    KafkaRequest,
    KafkaResult,
+   MyLoggerService,
    Topic
 } from '@flights.system/shared'
 
@@ -18,17 +19,24 @@ import {
 class AirplaneHandler implements OnModuleInit, OnModuleDestroy {
    constructor(
       @Inject(InjectServices.AirplaneService)
-      private readonly cityService: IAirplaneService,
+      private readonly airplaneService: IAirplaneService,
       @Inject(InjectServices.ConsumerService)
-      private readonly consumer: IConsumerService
+      private readonly consumer: IConsumerService,
+      @Inject(AirplaneHandler.name)
+      private readonly logger: MyLoggerService
    ) {}
 
    async onModuleInit() {
       await this.consumer.connect()
+
       await this.consumer.subscribeWithReply<
          KafkaRequest<number>,
          KafkaResult<GetAirplanesRes[]>
-      >(Topic.AIRPLANE_GET_TOPIC, async req => await this.cityService.get(req))
+      >(Topic.AIRPLANE_GET_TOPIC, async req => {
+         this.logger.log('Handled', { trace: req.traceId })
+         console.log(this.airplaneService)
+         return await this.airplaneService.get(req)
+      })
    }
 
    async onModuleDestroy() {

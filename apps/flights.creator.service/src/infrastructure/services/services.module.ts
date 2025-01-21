@@ -47,8 +47,7 @@ const entities = [
    providers: [
       CityServiceProvider,
       AirplaneServiceProvider,
-      AccumulatorService,
-      AirplaneService
+      AccumulatorService
    ],
    exports: [CityServiceProvider, AirplaneServiceProvider]
 })

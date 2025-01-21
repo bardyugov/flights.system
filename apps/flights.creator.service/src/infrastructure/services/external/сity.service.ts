@@ -1,5 +1,5 @@
 import { ICityService } from '../../../application/services/city.service'
-import { Inject, Injectable, Provider } from '@nestjs/common'
+import { Inject, Provider } from '@nestjs/common'
 import { CityEntity } from '../../entities/city.entity'
 import {
    CreateCityReq,
@@ -16,7 +16,6 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
-@Injectable()
 class CityService implements ICityService {
    constructor(
       @InjectRepository(CityEntity)

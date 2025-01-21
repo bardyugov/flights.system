@@ -1,5 +1,5 @@
 import { IAirplaneService } from '../../../application/services/airplane.service'
-import { Inject, Injectable, Provider } from '@nestjs/common'
+import { Inject, Provider } from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { AirplaneEntity } from '../../entities/airplane.entity'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -14,12 +14,11 @@ import {
    InjectServices
 } from '@flights.system/shared'
 
-@Injectable()
 class AirplaneService implements IAirplaneService {
    private readonly faker = new Faker({ locale: [es] })
 
    constructor(
-      @InjectRepository(AirplaneService)
+      @InjectRepository(AirplaneEntity)
       private readonly airplaneRepo: Repository<AirplaneEntity>,
       @Inject(AirplaneService.name)
       private readonly logger: MyLoggerService
@@ -28,12 +27,15 @@ class AirplaneService implements IAirplaneService {
    async get(
       req: KafkaRequest<number>
    ): Promise<KafkaResult<GetAirplanesRes[]>> {
+      this.logger.debug('Start consuming')
       if (req.data > 20) {
          this.logger.log('So many count airplanes', { trace: req.traceId })
          return error('So many count airplanes')
       }
 
       const airplanesCount = await this.airplaneRepo.count()
+
+      this.logger.debug(`Count ${airplanesCount}`)
 
       if (airplanesCount === 0 || airplanesCount < req.data) {
          this.logger.log('Small count data', { trace: req.traceId })
@@ -44,12 +46,14 @@ class AirplaneService implements IAirplaneService {
       for (let i = 0; i < airplanesCount; i++) {
          randomIds.push(this.faker.number.int({ min: 1, max: airplanesCount }))
       }
-
+      this.logger.debug('Request db')
       const airplanes = await this.airplaneRepo
          .createQueryBuilder('airplane')
          .select()
          .where('airplane.id IN :ids', { ids: randomIds })
          .getMany()
+
+      this.logger.log('SELECT airplanes', { trace: req.traceId })
 
       return ok<GetAirplanesRes[]>(
          airplanes.map(v => ({

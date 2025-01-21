@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Provider } from '@nestjs/common'
+import { forwardRef, Inject, Provider } from '@nestjs/common'
 import { Kafka, Producer, Partitioners } from 'kafkajs'
 import {
    initKafkaLogger,
@@ -15,26 +15,25 @@ import { Topic } from '../topics/topic'
 import { MyLoggerService } from '../../logger/logger.service'
 import { ConnectorService } from '../connector/connector.service'
 
-@Injectable()
-class ProducerService extends ConnectorService implements IProducerService {
+class ProducerService implements IProducerService {
    private readonly producers = new Map<string, Producer>()
    private readonly subjects = new Map<string, Subject<unknown>>()
+   private readonly kafka: Kafka
 
    constructor(
       @Inject(forwardRef(() => InjectServices.ConsumerService))
       private readonly consumerService: IConsumerService,
       @Inject(ProducerService.name)
-      logger: MyLoggerService,
-      config: ConfigService
+      private readonly logger: MyLoggerService,
+      private readonly config: ConfigService,
+      private readonly connector: ConnectorService
    ) {
-      const kafka = new Kafka({
-         clientId: config.get<string>('CLIENT_ID'),
-         brokers: parseArrayFromConfig(config.get<string>('BROKERS')),
+      this.kafka = new Kafka({
+         clientId: this.config.get<string>('CLIENT_ID'),
+         brokers: parseArrayFromConfig(this.config.get<string>('BROKERS')),
          connectionTimeout: 10000,
-         logCreator: level => initKafkaLogger(level, logger)
+         logCreator: level => initKafkaLogger(level, this.logger)
       })
-
-      super(config, kafka, Object.values(Topic), logger)
    }
 
    private async sendMessage<T>(producer: Producer, topic: string, data: T) {
@@ -68,7 +67,13 @@ class ProducerService extends ConnectorService implements IProducerService {
       if (foundedProducer) {
          await this.sendMessage(foundedProducer, topic, data || null)
          this.logger.log('Success sent message from found producer')
-         return new Promise<Res>(res => foundSubject.subscribe(res))
+         return new Promise<Res>(res => {
+            foundSubject.subscribe(res)
+            setTimeout(() => {
+               foundSubject.unsubscribe()
+               res()
+            })
+         })
       }
 
       const createdProducer = this.buildProducer()
@@ -121,6 +126,10 @@ class ProducerService extends ConnectorService implements IProducerService {
       })
 
       this.subjects.set(topic, newSubject)
+   }
+
+   async connect() {
+      await this.connector.connect()
    }
 
    async disconnect(): Promise<void> {

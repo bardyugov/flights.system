@@ -1,11 +1,5 @@
 import { IAuthService } from '../../../application/services/auth.service'
-import {
-   Inject,
-   Injectable,
-   OnModuleDestroy,
-   OnModuleInit,
-   Provider
-} from '@nestjs/common'
+import { Inject, OnModuleDestroy, OnModuleInit, Provider } from '@nestjs/common'
 import {
    AuthTokenRes,
    error,
@@ -19,8 +13,7 @@ import {
    MyLoggerService,
    ok,
    RegisterEmployeeReq,
-   Topic,
-   ProducerService
+   Topic
 } from '@flights.system/shared'
 import { DataSource } from 'typeorm'
 import {
@@ -36,14 +29,13 @@ import {
    EmployeeStatusEnum
 } from '../../entities/employee.status.entity'
 
-@Injectable()
 class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
    private readonly faker = new Faker({ locale: [es] })
 
    constructor(
       @Inject(AuthService.name)
       private readonly logger: MyLoggerService,
-      @Inject(ProducerService.name)
+      @Inject(InjectServices.ProducerService)
       private readonly producer: IProducerService,
       private readonly jwtService: JwtService,
       private readonly dataSource: DataSource,
@@ -58,13 +50,13 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
       return [access, refresh]
    }
 
-   private getRandomAirplanes(traceId: string) {
+   private async getRandomAirplanes(traceId: string) {
       const count = this.faker.number.int({
          min: 1,
          max: 20
       })
 
-      return this.producer.produceWithReply<
+      return await this.producer.produceWithReply<
          KafkaRequest<number>,
          KafkaResult<GetAirplanesRes[]>
       >(Topic.AIRPLANE_GET_TOPIC, {
@@ -77,6 +69,7 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
       req: KafkaRequest<RegisterEmployeeReq>
    ): Promise<KafkaResult<AuthTokenRes>> {
       return this.dataSource.transaction(async transactionManager => {
+         this.logger.log('Handled', { trace: req.traceId })
          const existEmployee = await transactionManager.findOne(
             EmployeeEntity,
             {
@@ -156,7 +149,7 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
 
    async onModuleInit() {
       await this.producer.connect()
-      await this.producer.subscribeOfReply(Topic.AIRPLANE_GET_TOPIC)
+      await this.producer.subscribeOfReply(Topic.AIRPLANE_GET_TOPIC_REPLY)
    }
 
    async onModuleDestroy() {

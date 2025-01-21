@@ -1,12 +1,12 @@
 import { Consumer, EachMessageHandler, Kafka } from 'kafkajs'
-import { forwardRef, Inject, Injectable, Provider } from '@nestjs/common'
+import { forwardRef, Inject, Provider } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import {
+   buildReplyTopic,
+   initKafkaLogger,
    InjectServices,
    parseArrayFromConfig,
-   initKafkaLogger,
-   safelyParseBuffer,
-   buildReplyTopic
+   safelyParseBuffer
 } from '../../../utils/utils'
 import { IConsumerService } from '../../../../application/services/consumer.interface'
 import { IProducerService } from '../../../../application/services/producer.inteface'
@@ -15,24 +15,24 @@ import { Topic } from '../topics/topic'
 import { MyLoggerService } from '../../logger/logger.service'
 import { ConnectorService } from '../connector/connector.service'
 
-@Injectable()
-class ConsumerService extends ConnectorService implements IConsumerService {
+class ConsumerService implements IConsumerService {
    private readonly consumers = new Map<string, Consumer>()
    private readonly consumerGroupId: string
+   private readonly kafka: Kafka
 
    constructor(
       @Inject(forwardRef(() => InjectServices.ProducerService))
       private readonly producerService: IProducerService,
-      config: ConfigService,
+      private readonly config: ConfigService,
       @Inject(ConsumerService.name)
-      logger: MyLoggerService
+      private readonly logger: MyLoggerService,
+      private readonly connector: ConnectorService
    ) {
-      const kafka = new Kafka({
-         clientId: config.get<string>('CLIENT_ID'),
-         brokers: parseArrayFromConfig(config.get<string>('BROKERS')),
+      this.kafka = new Kafka({
+         clientId: this.config.get<string>('CLIENT_ID'),
+         brokers: parseArrayFromConfig(this.config.get<string>('BROKERS')),
          logCreator: level => initKafkaLogger(level, logger)
       })
-      super(config, kafka, Object.values(Topic), logger)
 
       this.consumerGroupId = config.get('CONSUMER_GROUP_ID')
    }
@@ -83,12 +83,16 @@ class ConsumerService extends ConnectorService implements IConsumerService {
 
       await consumer.run({
          eachMessage: async payload => {
-            const data = safelyParseBuffer<Req>(payload.message.value)
-            if (!data) {
-               throw new NotParsedBuffer('Not parsed message')
-            }
+            try {
+               const data = safelyParseBuffer<Req>(payload.message.value)
+               if (!data) {
+                  throw new NotParsedBuffer('Not parsed message')
+               }
 
-            await callback(data)
+               await callback(data)
+            } catch (error) {
+               this.logger.error(error)
+            }
          }
       })
 
@@ -105,14 +109,18 @@ class ConsumerService extends ConnectorService implements IConsumerService {
       callback: (message: Req) => Promise<Res>
    ): Promise<void> {
       await this.buildSubscribeWithReplyHandler(topic, async payload => {
-         const data = safelyParseBuffer<Req>(payload.message.value)
-         if (!data) {
-            throw new NotParsedBuffer('Not parsed message')
-         }
+         try {
+            const data = safelyParseBuffer<Req>(payload.message.value)
+            if (!data) {
+               throw new NotParsedBuffer('Not parsed message')
+            }
 
-         const replyTopic = buildReplyTopic(topic) as Topic
-         const replyData = await callback(data)
-         await this.producerService.produce(replyTopic, replyData)
+            const replyTopic = buildReplyTopic(topic) as Topic
+            const replyData = await callback(data)
+            await this.producerService.produce(replyTopic, replyData)
+         } catch (error) {
+            this.logger.error(error)
+         }
       })
    }
 
@@ -121,10 +129,18 @@ class ConsumerService extends ConnectorService implements IConsumerService {
       callback: () => Promise<Res>
    ): Promise<void> {
       await this.buildSubscribeWithReplyHandler(topic, async () => {
-         const replyTopic = buildReplyTopic(topic) as Topic
-         const replyData = await callback()
-         await this.producerService.produce(replyTopic, replyData)
+         try {
+            const replyTopic = buildReplyTopic(topic) as Topic
+            const replyData = await callback()
+            await this.producerService.produce(replyTopic, replyData)
+         } catch (error) {
+            this.logger.error(error)
+         }
       })
+   }
+
+   async connect() {
+      await this.connector.connect()
    }
 
    async disconnect(): Promise<void> {
