@@ -14,7 +14,7 @@ class JwtService {
       this.secret_key = this.config.get<string>('SECRET_KEY')
    }
 
-   create(data: JwtPayload, expiresIn: number): string {
+   create(data: JwtPayload, expiresIn: string): string {
       return this.jwt.sign(data, {
          expiresIn,
          secret: this.secret_key

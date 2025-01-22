@@ -37,7 +37,7 @@ class CityService implements ICityService {
          this.logger.warn(`City already exists with name ${founded.name}`, {
             trace: req.traceId
          })
-         return error('City already exists')
+         return error('City already exists', req.traceId)
       }
 
       const createdCity = await this.cityRepository.save(
@@ -47,11 +47,14 @@ class CityService implements ICityService {
       this.logger.log(`Success created city with id: ${createdCity.id}`, {
          trace: req.traceId
       })
-      return ok<CreatedCityRes>({
-         name: createdCity.name,
-         country: createdCity.country,
-         createAt: createdCity.createAt
-      })
+      return ok<CreatedCityRes>(
+         {
+            name: createdCity.name,
+            country: createdCity.country,
+            createAt: createdCity.createAt
+         },
+         req.traceId
+      )
    }
 
    async getMany(
@@ -59,13 +62,13 @@ class CityService implements ICityService {
    ): Promise<KafkaResult<CreatedCityRes[]>> {
       if (req.data.limit > 20) {
          this.logger.warn('Invalid limit', { trace: req.traceId })
-         return error('Invlid limit')
+         return error('Invalid limit', req.traceId)
       }
 
       const cache = await this.cacheManager.get<CreatedCityRes[]>('city.many')
       if (cache) {
          this.logger.log('Success find cities in cache')
-         return ok<CreatedCityRes[]>(cache)
+         return ok<CreatedCityRes[]>(cache, req.traceId)
       }
 
       const cities = await this.cityRepository.find({
@@ -80,7 +83,7 @@ class CityService implements ICityService {
 
       await this.cacheManager.set('city.many', citiesRes, 10000)
       this.logger.log('Success get cities from db', { trace: req.traceId })
-      return ok<CreatedCityRes[]>(citiesRes)
+      return ok<CreatedCityRes[]>(citiesRes, req.traceId)
    }
 
    async findByName(
@@ -95,14 +98,17 @@ class CityService implements ICityService {
          this.logger.warn(`Not found city with name: ${req.data}`, {
             trace: req.traceId
          })
-         return error('Not found city')
+         return error('Not found city', req.traceId)
       }
 
-      return ok<CreatedCityRes>({
-         name: foundedCity.name,
-         country: foundedCity.country,
-         createAt: foundedCity.createAt
-      })
+      return ok<CreatedCityRes>(
+         {
+            name: foundedCity.name,
+            country: foundedCity.country,
+            createAt: foundedCity.createAt
+         },
+         req.traceId
+      )
    }
 }
 

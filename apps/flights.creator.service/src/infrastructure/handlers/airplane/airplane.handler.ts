@@ -9,8 +9,6 @@ import {
    GetAirplanesRes,
    IConsumerService,
    InjectServices,
-   KafkaRequest,
-   KafkaResult,
    MyLoggerService,
    Topic
 } from '@flights.system/shared'
@@ -29,14 +27,10 @@ class AirplaneHandler implements OnModuleInit, OnModuleDestroy {
    async onModuleInit() {
       await this.consumer.connect()
 
-      await this.consumer.subscribeWithReply<
-         KafkaRequest<number>,
-         KafkaResult<GetAirplanesRes[]>
-      >(Topic.AIRPLANE_GET_TOPIC, async req => {
-         this.logger.log('Handled', { trace: req.traceId })
-         console.log(this.airplaneService)
-         return await this.airplaneService.get(req)
-      })
+      await this.consumer.subscribeWithReply<number, GetAirplanesRes[]>(
+         Topic.AIRPLANE_GET_TOPIC,
+         async req => await this.airplaneService.get(req)
+      )
    }
 
    async onModuleDestroy() {

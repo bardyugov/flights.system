@@ -15,11 +15,9 @@ import {
    CreatedCityRes,
    InjectServices,
    IProducerService,
-   KafkaResult,
    Topic,
    MyLoggerService,
    RequestTrace,
-   KafkaRequest,
    GetCityReq
 } from '@flights.system/shared'
 import { ApiOkResponse, ApiBadRequestResponse, ApiBody } from '@nestjs/swagger'
@@ -48,8 +46,8 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
       this.logger.log('Handled /city/create', { trace: req.traceId })
 
       const result = await this.producer.produceWithReply<
-         KafkaRequest<CreateCityReq>,
-         KafkaResult<CreatedCityRes>
+         CreateCityReq,
+         CreatedCityRes
       >(Topic.CITY_CREATE_TOPIC, { traceId: req.traceId, data: dto })
 
       return result
@@ -70,8 +68,8 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
       this.logger.log('Handled /city', { trace: req.traceId })
 
       const result = await this.producer.produceWithReply<
-         KafkaRequest<GetCityReq>,
-         KafkaResult<CreatedCityRes>
+         GetCityReq,
+         CreatedCityRes
       >(Topic.CITY_GET_TOPIC, { traceId: req.traceId, data: { limit, offset } })
 
       return result
@@ -95,8 +93,8 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
       })
 
       const result = await this.producer.produceWithReply<
-         KafkaRequest<string>,
-         KafkaResult<CreatedCityRes>
+         string,
+         CreatedCityRes
       >(Topic.CITY_FIND_BY_NAME_TOPIC, { traceId: req.traceId, data: name })
 
       return result

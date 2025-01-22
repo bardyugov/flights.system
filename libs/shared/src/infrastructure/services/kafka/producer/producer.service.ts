@@ -4,7 +4,10 @@ import {
    initKafkaLogger,
    parseArrayFromConfig,
    InjectServices,
-   buildReplyTopic
+   buildReplyTopic,
+   KafkaResult,
+   error,
+   KafkaRequest
 } from '../../../utils/utils'
 import { IProducerService } from '../../../../application/services/producer.inteface'
 import { ConfigService } from '@nestjs/config'
@@ -19,6 +22,7 @@ class ProducerService implements IProducerService {
    private readonly producers = new Map<string, Producer>()
    private readonly subjects = new Map<string, Subject<unknown>>()
    private readonly kafka: Kafka
+   private readonly resolveTime = 10000
 
    constructor(
       @Inject(forwardRef(() => InjectServices.ConsumerService))
@@ -53,38 +57,21 @@ class ProducerService implements IProducerService {
       })
    }
 
-   private async buildProduceWithReplyHandler<Req, Res>(
-      topic: Topic,
-      data?: Req
-   ): Promise<Res> {
-      const foundedProducer = this.producers.get(topic)
-      const replyTopic = buildReplyTopic(topic.toString())
-      const foundSubject = this.subjects.get(replyTopic) as Subject<Res>
-      if (!foundSubject) {
-         throw new NotFoundReplyTopicException('Not found reply topic')
-      }
+   private tryResolve<Res>(
+      foundSubject: Subject<KafkaResult<Res>>,
+      traceId: string
+   ): Promise<KafkaResult<Res>> {
+      return new Promise<KafkaResult<Res>>(resolve => {
+         const timeout = setTimeout(() => {
+            resolve(error('Unresolved message by timeout', traceId))
+            clearTimeout(timeout)
+         }, this.resolveTime)
 
-      if (foundedProducer) {
-         await this.sendMessage(foundedProducer, topic, data || null)
-         this.logger.log('Success sent message from found producer')
-         return new Promise<Res>(res => {
-            foundSubject.subscribe(res)
-            setTimeout(() => {
-               foundSubject.unsubscribe()
-               res()
-            })
+         foundSubject.subscribe(data => {
+            clearTimeout(timeout)
+            resolve(data)
          })
-      }
-
-      const createdProducer = this.buildProducer()
-      await createdProducer.connect()
-      this.logger.log('Success created producer')
-
-      await this.sendMessage(createdProducer, topic, data || null)
-      this.producers.set(topic, createdProducer)
-      this.logger.log('Success sent message from created producer')
-
-      return new Promise<Res>(res => foundSubject.subscribe(res))
+      })
    }
 
    async produce<Req>(topic: Topic, data: Req): Promise<void> {
@@ -103,12 +90,34 @@ class ProducerService implements IProducerService {
       this.logger.log('Success sent message from created producer')
    }
 
-   async produceEmptyMsgWithReply<Res>(topic: Topic): Promise<Res> {
-      return this.buildProduceWithReplyHandler<unknown, Res>(topic)
-   }
+   async produceWithReply<Req, Res>(
+      topic: Topic,
+      data: KafkaRequest<Req>
+   ): Promise<KafkaResult<Res>> {
+      const foundedProducer = this.producers.get(topic)
+      const replyTopic = buildReplyTopic(topic.toString())
+      const foundSubject = this.subjects.get(replyTopic) as Subject<
+         KafkaResult<Res>
+      >
+      if (!foundSubject) {
+         throw new NotFoundReplyTopicException('Not found reply topic')
+      }
 
-   async produceWithReply<Req, Res>(topic: Topic, data: Req): Promise<Res> {
-      return this.buildProduceWithReplyHandler<Req, Res>(topic, data)
+      if (foundedProducer) {
+         await this.sendMessage(foundedProducer, topic, data)
+         this.logger.log('Success sent message from found producer')
+         return this.tryResolve(foundSubject, data.traceId)
+      }
+
+      const createdProducer = this.buildProducer()
+      await createdProducer.connect()
+      this.logger.log('Success created producer')
+
+      await this.sendMessage(createdProducer, topic, data)
+      this.producers.set(topic, createdProducer)
+      this.logger.log('Success sent message from created producer')
+
+      return this.tryResolve(foundSubject, data.traceId)
    }
 
    async subscribeOfReply(topic: Topic): Promise<void> {

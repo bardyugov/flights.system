@@ -30,7 +30,7 @@ type EmployeeRole = z.infer<typeof employeeRole>
 
 class CreateCityReq extends createZodDto(createCityReqCred) {
    @ApiProperty({ type: 'string', description: 'Name of city' })
-   city: string
+   name: string
 
    @ApiProperty({ type: 'string', description: 'Country of city' })
    country: string

@@ -5,12 +5,13 @@ import {
    buildReplyTopic,
    initKafkaLogger,
    InjectServices,
+   KafkaRequest,
+   KafkaResult,
    parseArrayFromConfig,
    safelyParseBuffer
 } from '../../../utils/utils'
 import { IConsumerService } from '../../../../application/services/consumer.interface'
 import { IProducerService } from '../../../../application/services/producer.inteface'
-import { NotParsedBuffer } from '../../../common/exceptions/producer.exception'
 import { Topic } from '../topics/topic'
 import { MyLoggerService } from '../../logger/logger.service'
 import { ConnectorService } from '../connector/connector.service'
@@ -69,7 +70,7 @@ class ConsumerService implements IConsumerService {
 
    async subscribe<Req>(
       topic: Topic,
-      callback: (message: Req) => Promise<unknown>
+      callback: (message: KafkaRequest<Req>) => Promise<unknown>
    ): Promise<void> {
       const foundedConsumer = this.consumers.get(topic)
       if (foundedConsumer) {
@@ -84,10 +85,9 @@ class ConsumerService implements IConsumerService {
       await consumer.run({
          eachMessage: async payload => {
             try {
-               const data = safelyParseBuffer<Req>(payload.message.value)
-               if (!data) {
-                  throw new NotParsedBuffer('Not parsed message')
-               }
+               const data = safelyParseBuffer<KafkaRequest<Req>>(
+                  payload.message.value
+               )
 
                await callback(data)
             } catch (error) {
@@ -106,33 +106,17 @@ class ConsumerService implements IConsumerService {
 
    async subscribeWithReply<Req, Res>(
       topic: Topic,
-      callback: (message: Req) => Promise<Res>
+      callback: (message: KafkaRequest<Req>) => Promise<KafkaResult<Res>>
    ): Promise<void> {
       await this.buildSubscribeWithReplyHandler(topic, async payload => {
          try {
-            const data = safelyParseBuffer<Req>(payload.message.value)
-            if (!data) {
-               throw new NotParsedBuffer('Not parsed message')
-            }
-
+            const req = safelyParseBuffer<KafkaRequest<Req>>(
+               payload.message.value
+            )
             const replyTopic = buildReplyTopic(topic) as Topic
-            const replyData = await callback(data)
-            await this.producerService.produce(replyTopic, replyData)
-         } catch (error) {
-            this.logger.error(error)
-         }
-      })
-   }
+            const reply = await callback(req)
 
-   async subscribeEmptyMsgWithReply<Res>(
-      topic: Topic,
-      callback: () => Promise<Res>
-   ): Promise<void> {
-      await this.buildSubscribeWithReplyHandler(topic, async () => {
-         try {
-            const replyTopic = buildReplyTopic(topic) as Topic
-            const replyData = await callback()
-            await this.producerService.produce(replyTopic, replyData)
+            await this.producerService.produce(replyTopic, reply)
          } catch (error) {
             this.logger.error(error)
          }

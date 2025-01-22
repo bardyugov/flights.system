@@ -11,8 +11,6 @@ import {
    AuthTokenRes,
    InjectServices,
    IProducerService,
-   KafkaRequest,
-   KafkaResult,
    MyLoggerService,
    RegisterEmployeeReq,
    RequestTrace,
@@ -47,13 +45,13 @@ class AuthHandler implements OnModuleInit, OnModuleDestroy {
       this.logger.log('Handled /employee/register', { trace: req.traceId })
 
       const result = await this.producer.produceWithReply<
-         KafkaRequest<RegisterEmployeeReq>,
-         KafkaResult<AuthTokenRes>
+         RegisterEmployeeReq,
+         AuthTokenRes
       >(Topic.AUTH_REGISTER_EMPLOYEE, {
          traceId: req.traceId,
          data: dto
       })
-
+      console.log(result)
       return result
    }
 

@@ -24,25 +24,34 @@ type Error = {
    message: string
 }
 
-function ok<T>(value: T): Ok<T> {
-   return {
-      state: 'ok',
-      value: value
-   }
+type KafkaResult<T> = {
+   traceId: string
+   data: Ok<T> | Error
 }
-
-function error(msg: string): Error {
-   return {
-      state: 'error',
-      message: msg
-   }
-}
-
-type KafkaResult<T> = Ok<T> | Error
 
 type KafkaRequest<T> = {
-   data: T
    traceId: string
+   data?: T
+}
+
+function ok<T>(value: T, traceId: string): KafkaResult<T> {
+   return {
+      traceId: traceId,
+      data: {
+         state: 'ok',
+         value: value
+      }
+   }
+}
+
+function error<T>(msg: string, traceId: string): KafkaResult<T> {
+   return {
+      traceId: traceId,
+      data: {
+         state: 'error',
+         message: msg
+      }
+   }
 }
 
 interface RequestTrace extends Request {
@@ -74,13 +83,9 @@ function buildReplyTopic(topic: string) {
 }
 
 function safelyParseBuffer<T>(buffer: Buffer) {
-   try {
-      const stringBuffer = buffer.toString()
-      const value: T = JSON.parse(stringBuffer)
-      return value
-   } catch (e) {
-      return null
-   }
+   const stringBuffer = buffer.toString()
+   const value: T = JSON.parse(stringBuffer)
+   return value
 }
 
 function initKafkaLogger(

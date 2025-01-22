@@ -7,8 +7,6 @@ import {
 import {
    IConsumerService,
    InjectServices,
-   KafkaResult,
-   KafkaRequest,
    RegisterEmployeeReq,
    AuthTokenRes,
    Topic
@@ -27,10 +25,7 @@ class AuthHandler implements OnModuleInit, OnModuleDestroy {
    async onModuleInit() {
       await this.consumer.connect()
 
-      await this.consumer.subscribeWithReply<
-         KafkaRequest<RegisterEmployeeReq>,
-         KafkaResult<AuthTokenRes>
-      >(
+      await this.consumer.subscribeWithReply<RegisterEmployeeReq, AuthTokenRes>(
          Topic.AUTH_REGISTER_EMPLOYEE,
          async req => await this.authService.registerEmployee(req)
       )
