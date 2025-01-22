@@ -9,7 +9,8 @@ import {
    InjectServices,
    RegisterEmployeeReq,
    AuthTokenRes,
-   Topic
+   Topic,
+   RegisterClientReq
 } from '@flights.system/shared'
 import { IAuthService } from '../../../application/services/auth.service'
 
@@ -28,6 +29,11 @@ class AuthHandler implements OnModuleInit, OnModuleDestroy {
       await this.consumer.subscribeWithReply<RegisterEmployeeReq, AuthTokenRes>(
          Topic.AUTH_REGISTER_EMPLOYEE,
          async req => await this.authService.registerEmployee(req)
+      )
+
+      await this.consumer.subscribeWithReply<RegisterClientReq, AuthTokenRes>(
+         Topic.AUTH_REGISTER_CLIENT,
+         async req => await this.authService.registerClient(req)
       )
    }
 

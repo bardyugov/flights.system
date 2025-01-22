@@ -4,7 +4,8 @@ import {
    AuthTokenRes,
    error,
    GetAirplanesRes,
-   GlobalRole,
+   GlobalRoles,
+   IJwtService,
    InjectServices,
    IProducerService,
    JwtPayload,
@@ -18,9 +19,8 @@ import {
 import { DataSource } from 'typeorm'
 import {
    EmployeeEntity,
-   EmployeeTypeEnum
+   EmployeeRoleEnum
 } from '../../entities/employee.entity'
-import { JwtService } from '../internal/jwt.service'
 import { BcryptService } from '../internal/bcrypt.service'
 import { es, Faker } from '@faker-js/faker'
 import { QualificationEntity } from '../../entities/qulification.entity'
@@ -29,6 +29,7 @@ import {
    EmployeeStatusEnum
 } from '../../entities/employee.status.entity'
 import { ConfigService } from '@nestjs/config'
+import { ClientEntity } from '../../entities/client.entity'
 
 class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
    private readonly faker = new Faker({ locale: [es] })
@@ -38,13 +39,14 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
       private readonly logger: MyLoggerService,
       @Inject(InjectServices.ProducerService)
       private readonly producer: IProducerService,
-      private readonly jwtService: JwtService,
+      @Inject(InjectServices.JwtService)
+      private readonly jwtService: IJwtService,
       private readonly dataSource: DataSource,
       private readonly bcryptService: BcryptService,
       private readonly config: ConfigService
    ) {}
 
-   private buildTokens(id: number, role: GlobalRole) {
+   private buildTokens(id: number, role: GlobalRoles) {
       const payload: JwtPayload = { id, role }
       const access = this.jwtService.create(
          payload,
@@ -56,6 +58,14 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
       )
 
       return [access, refresh]
+   }
+
+   private async getNextval(table: string) {
+      const [{ nextval }] = (await this.dataSource.query(
+         `SELECT nextval(pg_get_serial_sequence('${table}', 'id'))`
+      )) as { nextval: string }[]
+
+      return Number(nextval)
    }
 
    private async getRandomAirplanes(traceId: string) {
@@ -77,7 +87,6 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
       req: KafkaRequest<RegisterEmployeeReq>
    ): Promise<KafkaResult<AuthTokenRes>> {
       return this.dataSource.transaction(async transactionManager => {
-         this.logger.log('Handled', { trace: req.traceId })
          const existEmployee = await transactionManager.findOne(
             EmployeeEntity,
             {
@@ -94,13 +103,8 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
          }
 
          const hashPassword = this.bcryptService.create(req.data.password)
-         const result = await this.getRandomAirplanes(req.traceId)
-         if (result.data.state === 'error') {
-            this.logger.warn(result.data.message, { trace: req.traceId })
-            return error(result.data.message, req.traceId)
-         }
 
-         const employeeType = await transactionManager
+         const status = await transactionManager
             .getRepository(EmployeeStatusEntity)
             .findOne({
                where: {
@@ -108,32 +112,40 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
                }
             })
 
-         if (!employeeType) {
-            this.logger.warn('Not found employee type', { trace: req.traceId })
-            return error('Not found employee type', req.traceId)
+         if (!status) {
+            this.logger.warn('Not found employee role', { trace: req.traceId })
+            return error('Not found employee role', req.traceId)
          }
 
-         const [{ nextval }] = (await this.dataSource.query(
-            "SELECT nextval(pg_get_serial_sequence('employee', 'id'))"
-         )) as { nextval: string }[]
+         const nextval = await this.getNextval('employee')
 
-         const [access, refresh] = this.buildTokens(
-            Number(nextval),
-            req.data.role
-         )
+         const role =
+            req.data.role === 'pilot'
+               ? EmployeeRoleEnum.Pilot
+               : EmployeeRoleEnum.Stewardess
 
-         await transactionManager
-            .createQueryBuilder()
-            .insert()
-            .into(QualificationEntity)
-            .values(
-               result.data.value.map(v => ({
-                  airplaneId: v.id,
-                  name: `qualification-${v.pid}`
-               }))
-            )
-            .orIgnore('airplane_id')
-            .execute()
+         const [access, refresh] = this.buildTokens(nextval, role)
+
+         if (role === EmployeeRoleEnum.Pilot) {
+            const result = await this.getRandomAirplanes(req.traceId)
+            if (result.data.state === 'error') {
+               this.logger.warn(result.data.message, { trace: req.traceId })
+               return error(result.data.message, req.traceId)
+            }
+
+            await transactionManager
+               .createQueryBuilder()
+               .insert()
+               .into(QualificationEntity)
+               .values(
+                  result.data.value.map(v => ({
+                     airplaneId: v.id,
+                     name: `qualification-${v.pid}`
+                  }))
+               )
+               .orIgnore('airplane_id')
+               .execute()
+         }
 
          await transactionManager
             .createQueryBuilder()
@@ -146,11 +158,47 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
                birthDate: req.data.birthDate,
                password: hashPassword,
                refreshToken: refresh,
-               type:
-                  req.data.role === 'pilot'
-                     ? EmployeeTypeEnum.Pilot
-                     : EmployeeTypeEnum.Stewardess,
-               status: () => employeeType.id.toString()
+               role: role,
+               status: () => status.id.toString()
+            })
+            .execute()
+
+         this.logger.log('Success created employee', { trace: req.traceId })
+         return ok({ access, refresh }, req.traceId)
+      })
+   }
+
+   async registerClient(
+      req: KafkaRequest<RegisterEmployeeReq>
+   ): Promise<KafkaResult<AuthTokenRes>> {
+      return this.dataSource.transaction(async transactionManager => {
+         const existClient = await transactionManager.findOne(ClientEntity, {
+            where: {
+               name: req.data.name,
+               surname: req.data.surname,
+               lastName: req.data.lastName
+            }
+         })
+         if (existClient) {
+            this.logger.warn('Client already exist', { trace: req.traceId })
+            return error('Client already exist', req.traceId)
+         }
+
+         const nextval = await this.getNextval('client')
+         const hashPassword = this.bcryptService.create(req.data.password)
+         const [access, refresh] = this.buildTokens(nextval, req.data.role)
+
+         await transactionManager
+            .createQueryBuilder()
+            .insert()
+            .into(ClientEntity)
+            .values({
+               name: req.data.name,
+               surname: req.data.surname,
+               lastName: req.data.lastName,
+               birthDate: req.data.birthDate,
+               password: hashPassword,
+               refreshToken: refresh
             })
             .execute()
 

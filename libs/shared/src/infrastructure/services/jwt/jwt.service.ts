@@ -1,14 +1,15 @@
-import { Injectable } from '@nestjs/common'
-import { JwtService as jwt } from '@nestjs/jwt'
+import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
-import { JwtPayload } from '@flights.system/shared'
+import { InjectServices, JwtPayload } from '../../utils/utils'
+import { IJwtService } from '../../../application/services/jwt.interface'
+import { Injectable, Provider } from '@nestjs/common'
 
 @Injectable()
-class JwtService {
+class MyJwtService implements IJwtService {
    private readonly secret_key: string
 
    constructor(
-      private readonly jwt: jwt,
+      private readonly jwt: JwtService,
       private readonly config: ConfigService
    ) {
       this.secret_key = this.config.get<string>('SECRET_KEY')
@@ -32,4 +33,9 @@ class JwtService {
    }
 }
 
-export { JwtService }
+const MyJwtServiceProvider: Provider = {
+   provide: InjectServices.JwtService,
+   useClass: MyJwtService
+}
+
+export { MyJwtService, MyJwtServiceProvider }

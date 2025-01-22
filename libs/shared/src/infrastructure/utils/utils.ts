@@ -9,10 +9,11 @@ enum InjectServices {
    ProducerService = 'IProducerService',
    CityService = 'ICityService',
    AuthService = 'IAuthService',
-   AirplaneService = 'IAirplaneService'
+   AirplaneService = 'IAirplaneService',
+   JwtService = 'IJwtService'
 }
 
-type GlobalRole = EmployeeRole | 'client'
+type GlobalRoles = EmployeeRole | 'client'
 
 type Ok<T> = {
    state: 'ok'
@@ -54,17 +55,18 @@ function error<T>(msg: string, traceId: string): KafkaResult<T> {
    }
 }
 
-interface RequestTrace extends Request {
-   traceId: string
-}
-
 type ValidationResult = {
    [key: number]: string
 }
 
 type JwtPayload = {
    id: number
-   role: GlobalRole
+   role: GlobalRoles
+}
+
+interface RequestTrace extends Request {
+   traceId: string
+   user: JwtPayload
 }
 
 function parseArrayFromConfig(value: string) {
@@ -131,5 +133,5 @@ export {
    initConfigPath,
    ValidationResult,
    JwtPayload,
-   GlobalRole
+   GlobalRoles
 }

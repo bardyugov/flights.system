@@ -11,6 +11,9 @@ enum Topic {
    AUTH_REGISTER_EMPLOYEE = 'auth.register.employee.topic',
    AUTH_REGISTER_EMPLOYEE_REPLY = 'auth.register.employee.topic.reply',
 
+   AUTH_REGISTER_CLIENT = 'auth.register.client.topic',
+   AUTH_REGISTER_CLIENT_REPLY = 'auth.register.client.topic.reply',
+
    AIRPLANE_GET_TOPIC = 'airplane.get.topic',
    AIRPLANE_GET_TOPIC_REPLY = 'airplane.get.topic.reply'
 }

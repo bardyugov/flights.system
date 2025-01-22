@@ -12,6 +12,7 @@ import {
    InjectServices,
    IProducerService,
    MyLoggerService,
+   RegisterClientReq,
    RegisterEmployeeReq,
    RequestTrace,
    Topic
@@ -51,13 +52,48 @@ class AuthHandler implements OnModuleInit, OnModuleDestroy {
          traceId: req.traceId,
          data: dto
       })
-      console.log(result)
       return result
    }
 
+   @Post('client/register')
+   @ApiOkResponse({
+      description: 'New created client'
+   })
+   @ApiBadRequestResponse({
+      description: 'Client already exists'
+   })
+   @ApiBody({
+      description: 'Creating client dto',
+      type: RegisterClientReq
+   })
+   async registerClient(
+      @Body() dto: RegisterClientReq,
+      @Req() req: RequestTrace
+   ) {
+      this.logger.log('Handled /client/register', { trace: req.traceId })
+
+      const result = await this.producer.produceWithReply<
+         RegisterClientReq,
+         AuthTokenRes
+      >(Topic.AUTH_REGISTER_CLIENT, {
+         traceId: req.traceId,
+         data: dto
+      })
+
+      return result
+   }
+
+   /*  @Get('/public')
+   @UseGuards(AuthGuard)
+   async public(@Req() req: RequestTrace) {
+      return req.user
+   }
+*/
    async onModuleInit() {
       await this.producer.connect()
+      console.log('Init')
       await this.producer.subscribeOfReply(Topic.AUTH_REGISTER_EMPLOYEE_REPLY)
+      await this.producer.subscribeOfReply(Topic.AUTH_REGISTER_CLIENT_REPLY)
    }
 
    async onModuleDestroy() {

@@ -11,7 +11,7 @@ import {
 import { EmployeeStatusEntity } from './employee.status.entity'
 import { QualificationEntity } from './qulification.entity'
 
-enum EmployeeTypeEnum {
+enum EmployeeRoleEnum {
    Pilot = 'pilot',
    Stewardess = 'stewardess'
 }
@@ -62,12 +62,12 @@ class EmployeeEntity {
    status: EmployeeStatusEntity
 
    @Column({
-      name: 'type',
+      name: 'role',
       type: 'enum',
       nullable: false,
-      enum: EmployeeTypeEnum
+      enum: EmployeeRoleEnum
    })
-   type: EmployeeTypeEnum
+   role: EmployeeRoleEnum
 
    @ManyToMany(() => QualificationEntity, {})
    @JoinTable({
@@ -81,14 +81,13 @@ class EmployeeEntity {
          referencedColumnName: 'id'
       }
    })
-   @Check(`"type" = 'pilot'`)
    qualifications: QualificationEntity[]
 
    @Column({ name: 'password', nullable: false })
    password: string
 
-   @Column({ name: 'refresh_token', nullable: true })
+   @Column({ name: 'refresh_token', nullable: false })
    refreshToken: string
 }
 
-export { EmployeeEntity, EmployeeTypeEnum }
+export { EmployeeEntity, EmployeeRoleEnum }

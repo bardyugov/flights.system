@@ -35,8 +35,6 @@ class AirplaneService implements IAirplaneService {
 
       const airplanesCount = await this.airplaneRepo.count()
 
-      this.logger.debug(`Count ${airplanesCount}`)
-
       if (airplanesCount === 0 || airplanesCount < req.data) {
          this.logger.log('Small count data', { trace: req.traceId })
          return error('Small count data', req.traceId)
