@@ -119,6 +119,8 @@ function initConfigPath() {
    return path.join(__dirname, `./assets/.${process.env.NODE_ENV}.env`)
 }
 
+const JWT_AUTH = 'JWT_AUTH'
+
 export {
    InjectServices,
    parseArrayFromConfig,
@@ -133,5 +135,6 @@ export {
    initConfigPath,
    ValidationResult,
    JwtPayload,
-   GlobalRoles
+   GlobalRoles,
+   JWT_AUTH
 }

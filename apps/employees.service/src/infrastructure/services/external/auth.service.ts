@@ -50,11 +50,11 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
       const payload: JwtPayload = { id, role }
       const access = this.jwtService.create(
          payload,
-         this.config.get<string>('ACCESS_TTL')
+         this.config.get<number>('ACCESS_TTL')
       )
       const refresh = this.jwtService.create(
          payload,
-         this.config.get<string>('REFRESH_TTL')
+         this.config.get<number>('REFRESH_TTL')
       )
 
       return [access, refresh]
@@ -68,13 +68,13 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
       return Number(nextval)
    }
 
-   private async getRandomAirplanes(traceId: string) {
+   private getRandomAirplanes(traceId: string) {
       const count = this.faker.number.int({
          min: 1,
          max: 20
       })
 
-      return await this.producer.produceWithReply<number, GetAirplanesRes[]>(
+      return this.producer.produceWithReply<number, GetAirplanesRes[]>(
          Topic.AIRPLANE_GET_TOPIC,
          {
             traceId,

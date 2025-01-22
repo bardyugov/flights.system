@@ -3,27 +3,20 @@ import {
    ExecutionContext,
    Inject,
    Injectable,
-   Provider,
-   Scope,
    UnauthorizedException
 } from '@nestjs/common'
 import { Observable } from 'rxjs'
 import {
    IJwtService,
    InjectServices,
-   MyLoggerService,
    RequestTrace
 } from '@flights.system/shared'
-import { APP_GUARD, Reflector } from '@nestjs/core'
 
 @Injectable()
 class AuthGuard implements CanActivate {
    constructor(
       @Inject(InjectServices.JwtService)
-      private readonly jwtService: IJwtService,
-      @Inject(AuthGuard.name)
-      private readonly logger: MyLoggerService,
-      private readonly reflector: Reflector
+      private readonly jwtService: IJwtService
    ) {}
 
    private extractTokenFromHeader(request: RequestTrace): string | undefined {
@@ -39,7 +32,6 @@ class AuthGuard implements CanActivate {
       const payload = this.jwtService.encode(token)
 
       if (!token || !payload) {
-         this.logger.warn('Invalid token', { trace: request.traceId })
          throw new UnauthorizedException()
       }
       request.user = payload
@@ -48,10 +40,4 @@ class AuthGuard implements CanActivate {
    }
 }
 
-const AuthGuardProvider: Provider = {
-   provide: APP_GUARD,
-   useClass: AuthGuard,
-   scope: Scope.REQUEST
-}
-
-export { AuthGuard, AuthGuardProvider }
+export { AuthGuard }

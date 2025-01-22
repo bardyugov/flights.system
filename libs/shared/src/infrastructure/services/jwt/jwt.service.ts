@@ -15,7 +15,7 @@ class MyJwtService implements IJwtService {
       this.secret_key = this.config.get<string>('SECRET_KEY')
    }
 
-   create(data: JwtPayload, expiresIn: string): string {
+   create(data: JwtPayload, expiresIn: number): string {
       return this.jwt.sign(data, {
          expiresIn,
          secret: this.secret_key

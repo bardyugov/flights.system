@@ -1,9 +1,10 @@
 import { NestFactory } from '@nestjs/core'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { CoreModule } from './core/core.module'
-import { MyLoggerService } from '@flights.system/shared'
+import { JWT_AUTH, MyLoggerService } from '@flights.system/shared'
 import { ZodFilter } from './infrastructure/common/filters/zod.filter'
 import { ZodValidationPipe } from 'nestjs-zod'
+import cookieParser from 'cookie-parser'
 
 function configureSwagger() {
    return new DocumentBuilder()
@@ -11,6 +12,17 @@ function configureSwagger() {
       .setDescription('Flights gateway description')
       .setVersion('1.0')
       .addTag('api')
+      .addBearerAuth(
+         {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+            name: 'JWT',
+            description: 'Enter JWT token',
+            in: 'header'
+         },
+         JWT_AUTH
+      )
       .build()
 }
 
@@ -25,6 +37,7 @@ async function bootstrap() {
    app.setGlobalPrefix(globalPrefix)
    app.useGlobalPipes(new ZodValidationPipe())
    app.useGlobalFilters(new ZodFilter())
+   app.use(cookieParser())
 
    const port = process.env.PORT
 
