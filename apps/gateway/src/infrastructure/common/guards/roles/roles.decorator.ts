@@ -1,6 +1,6 @@
 import { Reflector } from '@nestjs/core'
-import { GlobalRoles } from '@flights.system/shared'
+import { EmployeeRoles } from '@flights.system/shared'
 
-const Roles = Reflector.createDecorator<GlobalRoles[]>()
+const Roles = Reflector.createDecorator<EmployeeRoles[]>()
 
 export { Roles }

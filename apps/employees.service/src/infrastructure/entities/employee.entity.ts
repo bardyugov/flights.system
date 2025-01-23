@@ -3,13 +3,11 @@ import {
    Entity,
    PrimaryGeneratedColumn,
    ManyToOne,
-   ManyToMany,
-   JoinTable,
-   Check,
-   JoinColumn
+   JoinColumn,
+   OneToMany
 } from 'typeorm'
 import { EmployeeStatusEntity } from './employee.status.entity'
-import { QualificationEntity } from './qulification.entity'
+import { QualificationToEmployeeEntity } from './qualification.to.employee.entity'
 
 enum EmployeeRoleEnum {
    Pilot = 'pilot',
@@ -69,25 +67,14 @@ class EmployeeEntity {
    })
    role: EmployeeRoleEnum
 
-   @ManyToMany(() => QualificationEntity, {})
-   @JoinTable({
-      name: 'employee_to_qualification',
-      joinColumn: {
-         name: 'qualification_id',
-         referencedColumnName: 'id'
-      },
-      inverseJoinColumn: {
-         name: 'employee_id',
-         referencedColumnName: 'id'
-      }
-   })
-   qualifications: QualificationEntity[]
-
    @Column({ name: 'password', nullable: false })
    password: string
 
-   @Column({ name: 'refresh_token', nullable: false })
+   @Column({ name: 'refresh_token', nullable: true })
    refreshToken: string
+
+   @OneToMany(() => QualificationToEmployeeEntity, entity => entity.employee)
+   qualificationToEmployees: QualificationToEmployeeEntity[]
 }
 
 export { EmployeeEntity, EmployeeRoleEnum }

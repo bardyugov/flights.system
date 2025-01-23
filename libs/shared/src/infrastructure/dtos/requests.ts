@@ -12,7 +12,7 @@ const getCityReqCred = z.object({
    limit: z.number().gte(20, 'Limit must bet <= 20')
 })
 
-const employeeRole = z.enum(['pilot', 'stewardess'])
+const employeesRolesCred = z.enum(['pilot', 'stewardess', 'client'])
 
 const registerEmployeeReqCred = z.object({
    name: z.string().min(5).max(23),
@@ -23,21 +23,10 @@ const registerEmployeeReqCred = z.object({
       .datetime()
       .transform(v => new Date(v)),
    password: z.string().min(5).max(23),
-   role: employeeRole
+   role: employeesRolesCred
 })
 
-const registerClientReqCred = z.object({
-   name: z.string().min(5).max(23),
-   surname: z.string().min(5).max(23),
-   lastName: z.string().min(5).max(23),
-   birthDate: z
-      .string()
-      .datetime()
-      .transform(v => new Date(v)),
-   password: z.string().min(5).max(23)
-})
-
-type EmployeeRole = z.infer<typeof employeeRole>
+type EmployeeRoles = z.infer<typeof employeesRolesCred>
 
 class CreateCityReq extends createZodDto(createCityReqCred) {
    @ApiProperty({ type: 'string', description: 'Name of city' })
@@ -90,37 +79,9 @@ class RegisterEmployeeReq extends createZodDto(registerEmployeeReqCred) {
    @ApiProperty({
       type: 'string',
       description: 'Employee role',
-      example: 'pilot || stewardess'
+      example: 'pilot || stewardess || client'
    })
-   role: EmployeeRole
+   role: EmployeeRoles
 }
 
-class RegisterClientReq extends createZodDto(registerClientReqCred) {
-   @ApiProperty({ type: 'string', description: 'Employee name' })
-   name: string
-
-   @ApiProperty({ type: 'string', description: 'Employee surname' })
-   surname: string
-
-   @ApiProperty({ type: 'string', description: 'Employee lastName' })
-   lastName: string
-
-   @ApiProperty({
-      type: 'string',
-      format: 'date-time',
-      description: 'Employee birthDate',
-      example: '2023-01-01T00:00:00Z'
-   })
-   birthDate: Date
-
-   @ApiProperty({ type: 'string', description: 'Employee password' })
-   password: string
-}
-
-export {
-   CreateCityReq,
-   GetCityReq,
-   RegisterEmployeeReq,
-   EmployeeRole,
-   RegisterClientReq
-}
+export { CreateCityReq, GetCityReq, RegisterEmployeeReq, EmployeeRoles }

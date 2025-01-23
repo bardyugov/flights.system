@@ -9,6 +9,7 @@ import {
    Post,
    Req,
    Res,
+   UnauthorizedException,
    UseGuards
 } from '@nestjs/common'
 import {
@@ -16,8 +17,8 @@ import {
    InjectServices,
    IProducerService,
    JWT_AUTH,
+   JwtPayload,
    MyLoggerService,
-   RegisterClientReq,
    RegisterEmployeeReq,
    RequestTrace,
    Topic
@@ -30,8 +31,8 @@ import {
    ApiOkResponse
 } from '@nestjs/swagger'
 import { AuthGuard } from '../../common/guards/auth/auth.guard'
-import { Roles } from '../../common/guards/roles/roles.decorator'
 import { ConfigService } from '@nestjs/config'
+import { RolesGuard } from '../../common/guards/roles/roles.guard'
 
 @Controller('/auth')
 class AuthHandler implements OnModuleInit, OnModuleDestroy {
@@ -47,7 +48,7 @@ class AuthHandler implements OnModuleInit, OnModuleDestroy {
       this.refreshTTL = this.config.get<number>('REFRESH_TTL')
    }
 
-   @Post('employee/register')
+   @Post('/register')
    @ApiOkResponse({
       description: 'New created employee'
    })
@@ -58,12 +59,12 @@ class AuthHandler implements OnModuleInit, OnModuleDestroy {
       description: 'Creating employee dto',
       type: RegisterEmployeeReq
    })
-   async registerEmployee(
+   async register(
       @Body() dto: RegisterEmployeeReq,
       @Req() req: RequestTrace,
       @Res({ passthrough: true }) res: Response
    ) {
-      this.logger.log('Handled /employee/register', { trace: req.traceId })
+      this.logger.log('Handled register', { trace: req.traceId })
 
       const { data } = await this.producer.produceWithReply<
          RegisterEmployeeReq,
@@ -74,47 +75,8 @@ class AuthHandler implements OnModuleInit, OnModuleDestroy {
       })
 
       if (data.state === 'error') {
-         this.logger.warn('Register employee failed ', { trace: req.traceId })
-         throw new BadRequestException('Register employee failed ')
-      }
-
-      const { refresh, access } = data.value
-      res.cookie('refresh', refresh, {
-         httpOnly: true,
-         maxAge: this.refreshTTL
-      })
-
-      return { access }
-   }
-
-   @Post('client/register')
-   @ApiOkResponse({
-      description: 'New created client'
-   })
-   @ApiBadRequestResponse({
-      description: 'Client already exists'
-   })
-   @ApiBody({
-      description: 'Creating client dto',
-      type: RegisterClientReq
-   })
-   async registerClient(
-      @Body() dto: RegisterClientReq,
-      @Req() req: RequestTrace,
-      @Res({ passthrough: true }) res: Response
-   ) {
-      this.logger.log('Handled /client/register', { trace: req.traceId })
-
-      const { data } = await this.producer.produceWithReply<
-         RegisterClientReq,
-         AuthTokenRes
-      >(Topic.AUTH_REGISTER_CLIENT, {
-         traceId: req.traceId,
-         data: dto
-      })
-      if (data.state === 'error') {
-         this.logger.warn('Register client failed ', { trace: req.traceId })
-         throw new BadRequestException('Register client failed ')
+         this.logger.warn(data.message, { trace: req.traceId })
+         throw new BadRequestException(data.message)
       }
 
       const { refresh, access } = data.value
@@ -127,18 +89,75 @@ class AuthHandler implements OnModuleInit, OnModuleDestroy {
    }
 
    @Get('/public')
+   @UseGuards(RolesGuard)
    @UseGuards(AuthGuard)
-   @Roles(['client'])
    @ApiBearerAuth(JWT_AUTH)
    async public(@Req() req: RequestTrace) {
       return req.user
+   }
+
+   @Get('/refresh')
+   async refresh(
+      @Req() req: RequestTrace,
+      @Res({ passthrough: true }) res: Response
+   ) {
+      const refreshToken = req.cookies['refresh'] as string
+      if (!refreshToken) {
+         this.logger.warn('Not found refresh')
+         throw new UnauthorizedException()
+      }
+
+      const { data } = await this.producer.produceWithReply<
+         string,
+         AuthTokenRes
+      >(Topic.AUTH_REFRESH_TOKEN, {
+         traceId: req.traceId,
+         data: refreshToken
+      })
+
+      if (data.state === 'error') {
+         this.logger.warn(data.message, { trace: req.traceId })
+         throw new BadRequestException(data.message)
+      }
+
+      const { refresh, access } = data.value
+      res.cookie('refresh', refresh, {
+         httpOnly: true,
+         maxAge: this.refreshTTL
+      })
+
+      return { access }
+   }
+
+   @Post('/logout')
+   @UseGuards(AuthGuard)
+   @ApiBearerAuth(JWT_AUTH)
+   async logout(
+      @Req() req: RequestTrace,
+      @Res({ passthrough: true }) res: Response
+   ) {
+      const { data } = await this.producer.produceWithReply<JwtPayload, string>(
+         Topic.AUTH_LOGOUT,
+         {
+            traceId: req.traceId,
+            data: req.user
+         }
+      )
+      if (data.state === 'error') {
+         this.logger.warn(data.message, { trace: req.traceId })
+         throw new BadRequestException(data.message)
+      }
+      res.cookie('refresh', null)
+
+      return { message: data.value }
    }
 
    async onModuleInit() {
       await this.producer.connect()
 
       await this.producer.subscribeOfReply(Topic.AUTH_REGISTER_EMPLOYEE_REPLY)
-      await this.producer.subscribeOfReply(Topic.AUTH_REGISTER_CLIENT_REPLY)
+      await this.producer.subscribeOfReply(Topic.AUTH_REFRESH_TOKEN_REPLY)
+      await this.producer.subscribeOfReply(Topic.AUTH_LOGOUT_REPLY)
    }
 
    async onModuleDestroy() {

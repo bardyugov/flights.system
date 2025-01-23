@@ -29,18 +29,15 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
       await this.consumerService.subscribeWithReply<
          CreateCityReq,
          CreatedCityRes
-      >(
-         Topic.CITY_CREATE_TOPIC,
-         async req => await this.cityService.create(req)
-      )
+      >(Topic.CITY_CREATE, async req => await this.cityService.create(req))
 
       await this.consumerService.subscribeWithReply<
          GetCityReq,
          CreatedCityRes[]
-      >(Topic.CITY_GET_TOPIC, async req => await this.cityService.getMany(req))
+      >(Topic.CITY_GET, async req => await this.cityService.getMany(req))
 
       await this.consumerService.subscribeWithReply<string, CreatedCityRes>(
-         Topic.CITY_FIND_BY_NAME_TOPIC,
+         Topic.CITY_FIND_BY_NAME,
          async req => await this.cityService.findByName(req)
       )
    }

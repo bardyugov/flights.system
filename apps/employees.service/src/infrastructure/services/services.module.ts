@@ -12,12 +12,14 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { ClientEntity } from '../entities/client.entity'
 import { AuthService, AuthServiceProvider } from './external/auth.service'
 import { BcryptService } from './internal/bcrypt.service'
+import { QualificationToEmployeeEntity } from '../entities/qualification.to.employee.entity'
 
 const entities = [
    EmployeeEntity,
    EmployeeStatusEntity,
    QualificationEntity,
-   ClientEntity
+   ClientEntity,
+   QualificationToEmployeeEntity
 ]
 
 @Module({

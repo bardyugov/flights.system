@@ -2,9 +2,9 @@ import { IAuthService } from '../../../application/services/auth.service'
 import { Inject, OnModuleDestroy, OnModuleInit, Provider } from '@nestjs/common'
 import {
    AuthTokenRes,
+   EmployeeRoles,
    error,
    GetAirplanesRes,
-   GlobalRoles,
    IJwtService,
    InjectServices,
    IProducerService,
@@ -30,6 +30,8 @@ import {
 } from '../../entities/employee.status.entity'
 import { ConfigService } from '@nestjs/config'
 import { ClientEntity } from '../../entities/client.entity'
+import { InsertResultWithId } from '../../database/query-types'
+import { QualificationToEmployeeEntity } from '../../entities/qualification.to.employee.entity'
 
 class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
    private readonly faker = new Faker({ locale: [es] })
@@ -46,7 +48,7 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
       private readonly config: ConfigService
    ) {}
 
-   private buildTokens(id: number, role: GlobalRoles) {
+   private buildTokens(id: number, role: EmployeeRoles) {
       const payload: JwtPayload = { id, role }
       const access = this.jwtService.create(
          payload,
@@ -60,14 +62,6 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
       return [access, refresh]
    }
 
-   private async getNextval(table: string) {
-      const [{ nextval }] = (await this.dataSource.query(
-         `SELECT nextval(pg_get_serial_sequence('${table}', 'id'))`
-      )) as { nextval: string }[]
-
-      return Number(nextval)
-   }
-
    private getRandomAirplanes(traceId: string) {
       const count = this.faker.number.int({
          min: 1,
@@ -75,7 +69,7 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
       })
 
       return this.producer.produceWithReply<number, GetAirplanesRes[]>(
-         Topic.AIRPLANE_GET_TOPIC,
+         Topic.AIRPLANE_GET,
          {
             traceId,
             data: count
@@ -83,7 +77,18 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
       )
    }
 
-   async registerEmployee(
+   private getRepositoryByRole(role: EmployeeRoles) {
+      switch (role) {
+         case 'client':
+            return this.dataSource.getRepository(ClientEntity)
+         case 'pilot':
+            return this.dataSource.getRepository(EmployeeEntity)
+         case 'stewardess':
+            return this.dataSource.getRepository(EmployeeEntity)
+      }
+   }
+
+   private async registerEmployee(
       req: KafkaRequest<RegisterEmployeeReq>
    ): Promise<KafkaResult<AuthTokenRes>> {
       return this.dataSource.transaction(async transactionManager => {
@@ -117,14 +122,28 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
             return error('Not found employee role', req.traceId)
          }
 
-         const nextval = await this.getNextval('employee')
-
          const role =
             req.data.role === 'pilot'
                ? EmployeeRoleEnum.Pilot
                : EmployeeRoleEnum.Stewardess
 
-         const [access, refresh] = this.buildTokens(nextval, role)
+         const { raw } = await transactionManager
+            .createQueryBuilder()
+            .insert()
+            .into(EmployeeEntity)
+            .values({
+               name: req.data.name,
+               surname: req.data.surname,
+               lastName: req.data.lastName,
+               birthDate: req.data.birthDate,
+               password: hashPassword,
+               role: role,
+               status: status
+            })
+            .returning(['id'])
+            .execute()
+
+         const employeeId = raw[0].id as number
 
          if (role === EmployeeRoleEnum.Pilot) {
             const result = await this.getRandomAirplanes(req.traceId)
@@ -133,7 +152,7 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
                return error(result.data.message, req.traceId)
             }
 
-            await transactionManager
+            const { raw }: InsertResultWithId = await transactionManager
                .createQueryBuilder()
                .insert()
                .into(QualificationEntity)
@@ -144,23 +163,29 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
                   }))
                )
                .orIgnore('airplane_id')
+               .returning(['id'])
+               .execute()
+
+            await transactionManager
+               .createQueryBuilder()
+               .insert()
+               .into(QualificationToEmployeeEntity)
+               .values(
+                  raw.map(qualification => ({
+                     qualification: () => qualification.id.toString(),
+                     employee: () => employeeId.toString()
+                  }))
+               )
                .execute()
          }
 
+         const [access, refresh] = this.buildTokens(employeeId, role)
+
          await transactionManager
             .createQueryBuilder()
-            .insert()
-            .into(EmployeeEntity)
-            .values({
-               name: req.data.name,
-               surname: req.data.surname,
-               lastName: req.data.lastName,
-               birthDate: req.data.birthDate,
-               password: hashPassword,
-               refreshToken: refresh,
-               role: role,
-               status: () => status.id.toString()
-            })
+            .update(EmployeeEntity)
+            .set({ refreshToken: refresh })
+            .where('id = :id', { id: employeeId })
             .execute()
 
          this.logger.log('Success created employee', { trace: req.traceId })
@@ -168,7 +193,7 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
       })
    }
 
-   async registerClient(
+   private async registerClient(
       req: KafkaRequest<RegisterEmployeeReq>
    ): Promise<KafkaResult<AuthTokenRes>> {
       return this.dataSource.transaction(async transactionManager => {
@@ -184,11 +209,9 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
             return error('Client already exist', req.traceId)
          }
 
-         const nextval = await this.getNextval('client')
          const hashPassword = this.bcryptService.create(req.data.password)
-         const [access, refresh] = this.buildTokens(nextval, req.data.role)
 
-         await transactionManager
+         const { raw }: InsertResultWithId = await transactionManager
             .createQueryBuilder()
             .insert()
             .into(ClientEntity)
@@ -197,9 +220,19 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
                surname: req.data.surname,
                lastName: req.data.lastName,
                birthDate: req.data.birthDate,
-               password: hashPassword,
-               refreshToken: refresh
+               password: hashPassword
             })
+            .returning(['id'])
+            .execute()
+
+         const clientId = raw[0].id
+         const [access, refresh] = this.buildTokens(clientId, req.data.role)
+
+         await transactionManager
+            .createQueryBuilder()
+            .update(ClientEntity)
+            .set({ refreshToken: refresh })
+            .where('id = :id', { clientId })
             .execute()
 
          this.logger.log('Success created employee', { trace: req.traceId })
@@ -207,9 +240,67 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
       })
    }
 
+   async register(
+      req: KafkaRequest<RegisterEmployeeReq>
+   ): Promise<KafkaResult<AuthTokenRes>> {
+      switch (req.data.role) {
+         case 'client':
+            return this.registerClient(req)
+         case 'pilot':
+            return this.registerEmployee(req)
+         case 'stewardess':
+            return this.registerEmployee(req)
+      }
+   }
+
+   async refresh(
+      req: KafkaRequest<string>
+   ): Promise<KafkaResult<AuthTokenRes>> {
+      const payload = this.jwtService.encode(req.data)
+      if (!payload) {
+         this.logger.warn('Invalid token', { trace: req.traceId })
+         return error('Invalid token', req.traceId)
+      }
+
+      const repository = this.getRepositoryByRole(payload.role)
+      const employee = await repository.findOne({ where: { id: payload.id } })
+      if (!employee) {
+         this.logger.warn('Not found employee', { trace: req.traceId })
+         return error('Not found employee', req.traceId)
+      }
+
+      const [access, refresh] = this.buildTokens(payload.id, payload.role)
+      await repository
+         .createQueryBuilder()
+         .update()
+         .set({ refreshToken: refresh })
+         .where('id = :id', { id: payload.id })
+         .execute()
+
+      return ok({ access, refresh }, req.traceId)
+   }
+
+   async logout(req: KafkaRequest<JwtPayload>): Promise<KafkaResult<string>> {
+      const repository = this.getRepositoryByRole(req.data.role)
+      const employee = await repository.findOne({ where: { id: req.data.id } })
+      if (!employee) {
+         this.logger.warn('Not found employee', { trace: req.traceId })
+         return error('Not found employee', req.traceId)
+      }
+
+      await repository
+         .createQueryBuilder()
+         .update()
+         .set({ refreshToken: null })
+         .where('id = :id', { id: req.data.id })
+         .execute()
+
+      return ok('Success logout', req.traceId)
+   }
+
    async onModuleInit() {
       await this.producer.connect()
-      await this.producer.subscribeOfReply(Topic.AIRPLANE_GET_TOPIC_REPLY)
+      await this.producer.subscribeOfReply(Topic.AIRPLANE_GET_REPLY)
    }
 
    async onModuleDestroy() {

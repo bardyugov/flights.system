@@ -50,7 +50,7 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
       const result = await this.producer.produceWithReply<
          CreateCityReq,
          CreatedCityRes
-      >(Topic.CITY_CREATE_TOPIC, { traceId: req.traceId, data: dto })
+      >(Topic.CITY_CREATE, { traceId: req.traceId, data: dto })
 
       return result
    }
@@ -72,7 +72,7 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
       const result = await this.producer.produceWithReply<
          GetCityReq,
          CreatedCityRes
-      >(Topic.CITY_GET_TOPIC, { traceId: req.traceId, data: { limit, offset } })
+      >(Topic.CITY_GET, { traceId: req.traceId, data: { limit, offset } })
 
       return result
    }
@@ -97,7 +97,7 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
       const result = await this.producer.produceWithReply<
          string,
          CreatedCityRes
-      >(Topic.CITY_FIND_BY_NAME_TOPIC, { traceId: req.traceId, data: name })
+      >(Topic.CITY_FIND_BY_NAME, { traceId: req.traceId, data: name })
 
       return result
    }
@@ -105,9 +105,9 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
    async onModuleInit() {
       await this.producer.connect()
 
-      await this.producer.subscribeOfReply(Topic.CITY_CREATE_TOPIC_REPLY)
-      await this.producer.subscribeOfReply(Topic.CITY_GET_TOPIC_REPLY)
-      await this.producer.subscribeOfReply(Topic.CITY_FIND_BY_NAME_TOPIC_REPLY)
+      await this.producer.subscribeOfReply(Topic.CITY_CREATE_REPLY)
+      await this.producer.subscribeOfReply(Topic.CITY_GET_REPLY)
+      await this.producer.subscribeOfReply(Topic.CITY_FIND_BY_NAME_REPLY)
    }
 
    async onModuleDestroy() {

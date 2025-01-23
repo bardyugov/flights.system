@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
+import { QualificationToEmployeeEntity } from './qualification.to.employee.entity'
 
 @Entity('qualification')
 class QualificationEntity {
@@ -26,6 +27,12 @@ class QualificationEntity {
       default: () => 'CURRENT_TIMESTAMP'
    })
    createAt: Date
+
+   @OneToMany(
+      () => QualificationToEmployeeEntity,
+      entity => entity.qualification
+   )
+   qualificationToEmployees: QualificationToEmployeeEntity[]
 }
 
 export { QualificationEntity }

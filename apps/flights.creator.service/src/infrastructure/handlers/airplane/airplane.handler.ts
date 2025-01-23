@@ -28,7 +28,7 @@ class AirplaneHandler implements OnModuleInit, OnModuleDestroy {
       await this.consumer.connect()
 
       await this.consumer.subscribeWithReply<number, GetAirplanesRes[]>(
-         Topic.AIRPLANE_GET_TOPIC,
+         Topic.AIRPLANE_GET,
          async req => await this.airplaneService.get(req)
       )
    }

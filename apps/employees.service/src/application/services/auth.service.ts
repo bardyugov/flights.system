@@ -3,17 +3,17 @@ import {
    KafkaRequest,
    RegisterEmployeeReq,
    KafkaResult,
-   RegisterClientReq
+   JwtPayload
 } from '@flights.system/shared'
 
 interface IAuthService {
-   registerEmployee(
+   register(
       req: KafkaRequest<RegisterEmployeeReq>
    ): Promise<KafkaResult<AuthTokenRes>>
 
-   registerClient(
-      req: KafkaRequest<RegisterClientReq>
-   ): Promise<KafkaResult<AuthTokenRes>>
+   refresh(req: KafkaRequest<string>): Promise<KafkaResult<AuthTokenRes>>
+
+   logout(req: KafkaRequest<JwtPayload>): Promise<KafkaResult<string>>
 }
 
 export { IAuthService }

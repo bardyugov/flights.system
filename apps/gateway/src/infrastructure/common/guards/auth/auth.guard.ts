@@ -28,10 +28,11 @@ class AuthGuard implements CanActivate {
       context: ExecutionContext
    ): boolean | Promise<boolean> | Observable<boolean> {
       const request = context.switchToHttp().getRequest() as RequestTrace
-      const token = this.extractTokenFromHeader(request)
-      const payload = this.jwtService.encode(token)
+      const refreshToken = request.cookies['refresh']
+      const accessToken = this.extractTokenFromHeader(request)
+      const payload = this.jwtService.encode(accessToken)
 
-      if (!token || !payload) {
+      if (!accessToken || !payload || !refreshToken) {
          throw new UnauthorizedException()
       }
       request.user = payload

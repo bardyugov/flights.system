@@ -2,7 +2,7 @@ import { LogEntry, logLevel } from 'kafkajs'
 import { Request } from 'express'
 import { LoggerService } from '@nestjs/common'
 import * as path from 'path'
-import { EmployeeRole } from '../dtos'
+import { EmployeeRoles } from '../dtos'
 
 enum InjectServices {
    ConsumerService = 'IConsumerService',
@@ -12,8 +12,6 @@ enum InjectServices {
    AirplaneService = 'IAirplaneService',
    JwtService = 'IJwtService'
 }
-
-type GlobalRoles = EmployeeRole | 'client'
 
 type Ok<T> = {
    state: 'ok'
@@ -61,7 +59,7 @@ type ValidationResult = {
 
 type JwtPayload = {
    id: number
-   role: GlobalRoles
+   role: EmployeeRoles
 }
 
 interface RequestTrace extends Request {
@@ -135,6 +133,5 @@ export {
    initConfigPath,
    ValidationResult,
    JwtPayload,
-   GlobalRoles,
    JWT_AUTH
 }
