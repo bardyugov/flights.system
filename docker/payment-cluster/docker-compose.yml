@@ -1,12 +1,12 @@
 version: '3.9'
 
 services:
-  employees.service.postgres:
+  payment.service.postgres:
     image: postgres:15.3
-    container_name: employees.service.postgres
+    container_name: payment.service.postgres
     restart: always
     ports:
-      - '5433:5432'
+      - '5434:5432'
     env_file:
       - ./config/.postgres.env
     volumes:
@@ -14,24 +14,18 @@ services:
     networks:
       - shared-network
 
-  employees.service.app:
-    container_name: employees.service.app
+  payment.service.app:
+    container_name: payment.service.app
     build:
       context: ../../
-      dockerfile: ./apps/employess.service/Dockerfile
+      dockerfile: ./apps/payment.service/Dockerfile
     depends_on:
-      - employees.service.postgres
-    volumes:
-      - ./volumes/logs:/app/logs
+      - payment.service.postgres
     ports:
-      - '3001:3000'
+      - '3002:3000'
     networks:
       - shared-network
 
 networks:
   shared-network:
     external: true
-
-volumes:
-  postgres-data:
-    driver: local

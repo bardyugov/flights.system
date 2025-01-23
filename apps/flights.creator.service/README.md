@@ -1,21 +1,9 @@
-## Run database server
-
-```sh
-cd docker/flights.creator.service-cluster
-docker-compose up --build -d
-```
-
-## Run transport cluster
-
-```sh
-cd docker/kafka-cluster
-docker-compose up --build -d
-```
-
 ## Set NODE_ENV
 
 ```sh
-export NODE_ENV=development || production
+export PORT=3000
+export NODE_ENV=development
+export NODE_ENV=production
 ```
 
 ## Apply migrations

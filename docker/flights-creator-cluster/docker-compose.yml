@@ -36,8 +36,6 @@ services:
     depends_on:
       - flights.creator.service.postgres
       - flights.creator.service.redis
-    volumes:
-      - ./volumes/logs:/app/logs
     ports:
       - '3000:3000'
     networks:

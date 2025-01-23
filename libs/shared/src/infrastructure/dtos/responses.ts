@@ -1,17 +1,25 @@
 class CreatedCityRes {
-   readonly name: string
-   readonly country: string
-   readonly createAt: Date
+   constructor(
+      readonly name: string,
+      readonly country: string,
+      readonly createAt: Date
+   ) {}
 }
 
 class AuthTokenRes {
-   readonly access: string
-   readonly refresh: string
+   constructor(readonly access: string, readonly refresh: string) {}
 }
 
 class GetAirplanesRes {
-   readonly id: number
-   readonly pid: number
+   constructor(readonly id: number, readonly pid: number) {}
 }
 
-export { CreatedCityRes, AuthTokenRes, GetAirplanesRes }
+class PaymentRes {
+   constructor(
+      readonly paymentId: number,
+      readonly createAt: Date,
+      readonly amount: number
+   ) {}
+}
+
+export { CreatedCityRes, AuthTokenRes, GetAirplanesRes, PaymentRes }

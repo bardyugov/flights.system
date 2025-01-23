@@ -10,7 +10,8 @@ enum InjectServices {
    CityService = 'ICityService',
    AuthService = 'IAuthService',
    AirplaneService = 'IAirplaneService',
-   JwtService = 'IJwtService'
+   JwtService = 'IJwtService',
+   PaymentService = 'IPaymentService'
 }
 
 type Ok<T> = {

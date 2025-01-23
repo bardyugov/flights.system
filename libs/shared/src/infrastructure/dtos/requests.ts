@@ -84,4 +84,20 @@ class RegisterEmployeeReq extends createZodDto(registerEmployeeReqCred) {
    role: EmployeeRoles
 }
 
-export { CreateCityReq, GetCityReq, RegisterEmployeeReq, EmployeeRoles }
+type SagaStepType = 'invoke' | 'compensation'
+
+class PaymentReq {
+   constructor(
+      readonly type: SagaStepType,
+      readonly clientId: number,
+      readonly flightId: number
+   ) {}
+}
+
+export {
+   CreateCityReq,
+   GetCityReq,
+   RegisterEmployeeReq,
+   EmployeeRoles,
+   PaymentReq
+}

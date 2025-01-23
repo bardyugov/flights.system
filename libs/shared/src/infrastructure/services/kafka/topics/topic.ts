@@ -18,7 +18,11 @@ enum Topic {
    AUTH_LOGOUT_REPLY = 'auth.logout.topic.reply',
 
    AIRPLANE_GET = 'airplane.get.topic',
-   AIRPLANE_GET_REPLY = 'airplane.get.topic.reply'
+   AIRPLANE_GET_REPLY = 'airplane.get.topic.reply',
+
+   PAYMENT_INVOKE = 'payment.invoke.topic',
+   PAYMENT_INVOKE_REPLY = 'payment.invoke.topic.reply',
+   PAYMENT_COMPENSATION = 'payment.compensation.topic'
 }
 
 export { Topic }
