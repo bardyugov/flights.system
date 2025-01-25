@@ -1,18 +1,15 @@
 import { Topic } from '../../infrastructure/services'
+import { KafkaRequest, KafkaResult } from '../../infrastructure/utils/utils'
 
 interface IConsumerService {
    connect(): Promise<void>
-   subscribeEmptyMsgWithReply<Res>(
-      topic: Topic,
-      callback: () => Promise<Res>
-   ): Promise<void>
    subscribeWithReply<Req, Res>(
       topic: Topic,
-      callback: (message: Req) => Promise<Res>
+      callback: (message: KafkaRequest<Req>) => Promise<KafkaResult<Res>>
    ): Promise<void>
    subscribe<Req>(
       topic: Topic,
-      callback: (message: Req) => Promise<unknown>
+      callback: (message: KafkaRequest<Req>) => Promise<unknown>
    ): Promise<void>
    disconnect(): Promise<void>
 }

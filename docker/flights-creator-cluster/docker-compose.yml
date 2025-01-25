@@ -1,9 +1,9 @@
 version: '3.9'
 
 services:
-  postgres:
+  flights.creator.service.postgres:
     image: postgres:15.3
-    container_name: postgres
+    container_name: flights.creator.service.postgres
     restart: always
     ports:
       - '5432:5432'
@@ -14,9 +14,9 @@ services:
     networks:
       - shared-network
 
-  redis:
+  flights.creator.service.redis:
     image: bitnami/redis:7.4
-    container_name: redis
+    container_name: flights.creator.service.redis
     ports:
       - "6379:6379"
     environment:
@@ -28,16 +28,14 @@ services:
     networks:
       - shared-network
 
-  flights.creator.service:
-    container_name: flights.creator.service
+  flights.creator.service.app:
+    container_name: flights.creator.service.app
     build:
       context: ../../
       dockerfile: ./apps/flights.creator.service/Dockerfile
     depends_on:
-      - postgres
-      - redis
-    volumes:
-      - ./volumes/logs:/app/logs
+      - flights.creator.service.postgres
+      - flights.creator.service.redis
     ports:
       - '3000:3000'
     networks:

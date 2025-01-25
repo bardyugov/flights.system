@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  payment.service.postgres:
+    image: postgres:15.3
+    container_name: payment.service.postgres
+    restart: always
+    ports:
+      - '5434:5432'
+    env_file:
+      - ./config/.postgres.env
+    volumes:
+      - ./volumes/postgres-data:/var/lib/postgresql/data
+    networks:
+      - shared-network
+
+  payment.service.app:
+    container_name: payment.service.app
+    build:
+      context: ../../
+      dockerfile: ./apps/payment.service/Dockerfile
+    depends_on:
+      - payment.service.postgres
+    ports:
+      - '3002:3000'
+    networks:
+      - shared-network
+
+networks:
+  shared-network:
+    external: true

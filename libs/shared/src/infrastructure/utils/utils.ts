@@ -2,121 +2,150 @@ import { LogEntry, logLevel } from 'kafkajs'
 import { Request } from 'express'
 import { LoggerService } from '@nestjs/common'
 import * as path from 'path'
+import { EmployeeRoles } from '../dtos'
+import { SagaException } from '../common/exceptions/saga.exception'
 
 enum InjectServices {
-  ConsumerService = 'ConsumerService',
-  ProducerService = 'ProducerService',
-  CityService = 'CityService',
-  CityServiceLogger = 'CityServiceLogger',
-  AccumulatorServiceLogger = 'AccumulatorServiceLogger'
+   ConsumerService = 'IConsumerService',
+   ProducerService = 'IProducerService',
+   CityService = 'ICityService',
+   AuthService = 'IAuthService',
+   AirplaneService = 'IAirplaneService',
+   JwtService = 'IJwtService',
+   PaymentService = 'IPaymentService',
+   FlightsService = 'IFlightsService',
+   FlightJournalService = 'IFlightJournalService',
+   RegistrationProcessService = 'IRegistrationProcessSevice'
 }
 
 type Ok<T> = {
-  state: 'ok'
-  value: T
+   state: 'ok'
+   value: T
 }
 
 type Error = {
-  state: 'error'
-  message: string
+   state: 'error'
+   message: string
 }
 
-function ok<T>(value: T): Ok<T> {
-  return {
-    state: 'ok',
-    value: value
-  }
+type KafkaResult<T> = {
+   traceId: string
+   data: Ok<T> | Error
 }
-
-function error(msg: string): Error {
-  return {
-    state: 'error',
-    message: msg
-  }
-}
-
-type KafkaResult<T> = Ok<T> | Error
 
 type KafkaRequest<T> = {
-  data: T
-  traceId: string
+   traceId: string
+   data?: T
+}
+
+function ok<T>(value: T, traceId: string): KafkaResult<T> {
+   return {
+      traceId: traceId,
+      data: {
+         state: 'ok',
+         value: value
+      }
+   }
+}
+
+function error<T>(msg: string, traceId: string): KafkaResult<T> {
+   return {
+      traceId: traceId,
+      data: {
+         state: 'error',
+         message: msg
+      }
+   }
+}
+
+type ValidationResult = {
+   [key: number]: string
+}
+
+type JwtPayload = {
+   id: number
+   role: EmployeeRoles
 }
 
 interface RequestTrace extends Request {
-  traceId: string
+   traceId: string
+   user: JwtPayload
+}
+
+abstract class SagaStep<T = unknown, R = unknown> {
+   protected constructor(readonly name: string) {}
+
+   abstract compensationArg: T
+   abstract invoke(arg: T): Promise<R>
+   abstract withCompensation(): Promise<void>
 }
 
 function parseArrayFromConfig(value: string) {
-  if (value === '' || !value) {
-    return []
-  }
-  return value.split(';').map(t => t.trim())
+   if (value === '' || !value) {
+      return []
+   }
+   return value.split(';').map(t => t.trim())
 }
 
 function buildKafkaLogMessage(entry: LogEntry) {
-  return JSON.stringify({
-    level: entry.level,
-    label: entry.label,
-    message: entry.log.message
-  })
+   return `${entry.log.message}`
 }
 
 function buildReplyTopic(topic: string) {
-  return `${topic}.reply`
+   return `${topic}.reply`
 }
 
 function safelyParseBuffer<T>(buffer: Buffer) {
-  try {
-    const stringBuffer = buffer.toString()
-    const value: T = JSON.parse(stringBuffer)
-    return value
-  } catch (e) {
-    return null
-  }
+   const stringBuffer = buffer.toString()
+   const value: T = JSON.parse(stringBuffer)
+   return value
 }
 
 function initKafkaLogger(
-  level: logLevel,
-  logger: LoggerService
+   level: logLevel,
+   logger: LoggerService
 ): (entry: LogEntry) => void {
-  return entry => {
-    switch (level) {
-      case logLevel.ERROR:
-        logger.error(buildKafkaLogMessage(entry))
-        break
-      case logLevel.NOTHING:
-        logger.log(buildKafkaLogMessage(entry))
-        break
-      case logLevel.WARN:
-        logger.warn(buildKafkaLogMessage(entry))
-        break
-      case logLevel.INFO:
-        logger.log(buildKafkaLogMessage(entry))
-        break
-      case logLevel.DEBUG:
-        logger.debug(buildKafkaLogMessage(entry))
-        break
-    }
-  }
+   return entry => {
+      switch (level) {
+         case logLevel.ERROR:
+            logger.error(buildKafkaLogMessage(entry))
+            break
+         case logLevel.NOTHING:
+            logger.log(buildKafkaLogMessage(entry))
+            break
+         case logLevel.WARN:
+            logger.warn(buildKafkaLogMessage(entry))
+            break
+         case logLevel.INFO:
+            logger.log(buildKafkaLogMessage(entry))
+            break
+         case logLevel.DEBUG:
+            logger.debug(buildKafkaLogMessage(entry))
+            break
+      }
+   }
 }
 
 function initConfigPath() {
-  return path.join(
-    __dirname,
-    `./assets/.${process.env.NODE_ENV}.env`
-  )
+   return path.join(__dirname, `./assets/.${process.env.NODE_ENV}.env`)
 }
 
+const JWT_AUTH = 'JWT_AUTH'
+
 export {
-  InjectServices,
-  parseArrayFromConfig,
-  initKafkaLogger,
-  buildReplyTopic,
-  safelyParseBuffer,
-  KafkaResult,
-  ok,
-  error,
-  RequestTrace,
-  KafkaRequest,
-  initConfigPath
+   InjectServices,
+   parseArrayFromConfig,
+   initKafkaLogger,
+   buildReplyTopic,
+   safelyParseBuffer,
+   KafkaResult,
+   ok,
+   error,
+   RequestTrace,
+   KafkaRequest,
+   initConfigPath,
+   ValidationResult,
+   JwtPayload,
+   JWT_AUTH,
+   SagaStep
 }

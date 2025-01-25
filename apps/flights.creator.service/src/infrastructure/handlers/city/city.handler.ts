@@ -1,6 +1,6 @@
 import {
-   Controller,
    Inject,
+   Injectable,
    OnModuleDestroy,
    OnModuleInit
 } from '@nestjs/common'
@@ -10,13 +10,11 @@ import {
    GetCityReq,
    IConsumerService,
    InjectServices,
-   KafkaRequest,
-   KafkaResult,
    Topic
 } from '@flights.system/shared'
 import { ICityService } from '../../../application/services/city.service'
 
-@Controller()
+@Injectable()
 class CityHandler implements OnModuleInit, OnModuleDestroy {
    constructor(
       @Inject(InjectServices.ConsumerService)
@@ -29,23 +27,17 @@ class CityHandler implements OnModuleInit, OnModuleDestroy {
       await this.consumerService.connect()
 
       await this.consumerService.subscribeWithReply<
-         KafkaRequest<CreateCityReq>,
-         KafkaResult<CreatedCityRes>
-      >(
-         Topic.CITY_CREATE_TOPIC,
-         async req => await this.cityService.create(req)
-      )
+         CreateCityReq,
+         CreatedCityRes
+      >(Topic.CITY_CREATE, async req => await this.cityService.create(req))
 
       await this.consumerService.subscribeWithReply<
-         KafkaRequest<GetCityReq>,
-         KafkaResult<CreatedCityRes[]>
-      >(Topic.CITY_GET_TOPIC, async req => await this.cityService.getMany(req))
+         GetCityReq,
+         CreatedCityRes[]
+      >(Topic.CITY_GET, async req => await this.cityService.getMany(req))
 
-      await this.consumerService.subscribeWithReply<
-         KafkaRequest<string>,
-         KafkaResult<CreatedCityRes>
-      >(
-         Topic.CITY_FIND_BY_NAME_TOPIC,
+      await this.consumerService.subscribeWithReply<string, CreatedCityRes>(
+         Topic.CITY_FIND_BY_NAME,
          async req => await this.cityService.findByName(req)
       )
    }

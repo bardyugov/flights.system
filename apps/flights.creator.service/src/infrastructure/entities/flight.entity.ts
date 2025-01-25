@@ -44,6 +44,9 @@ class FlightEntity {
    @Column({ name: 'departure_time', type: 'timestamp', nullable: false })
    departureTime: Date
 
+   @Column({ name: 'remaining_places', nullable: false, default: 300 })
+   remainingPlaces: number
+
    constructor(
       from: CityEntity,
       to: CityEntity,
