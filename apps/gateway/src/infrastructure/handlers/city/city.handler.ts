@@ -8,8 +8,7 @@ import {
    Query,
    BadRequestException,
    Body,
-   Req,
-   UseGuards
+   Req
 } from '@nestjs/common'
 import {
    CreateCityReq,
@@ -22,7 +21,6 @@ import {
    GetCityReq
 } from '@flights.system/shared'
 import { ApiOkResponse, ApiBadRequestResponse, ApiBody } from '@nestjs/swagger'
-import { AuthGuard } from '../../common/guards/auth/auth.guard'
 
 @Controller('/city')
 class CityHandler implements OnModuleInit, OnModuleDestroy {

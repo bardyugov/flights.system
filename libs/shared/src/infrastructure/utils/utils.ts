@@ -73,21 +73,9 @@ interface RequestTrace extends Request {
 }
 
 abstract class SagaStep<T = unknown, R = unknown> {
-   protected compensationArgs: T
    protected constructor(readonly name: string) {}
 
-   protected setCompensationArgs(value: T) {
-      this.compensationArgs = value
-   }
-
-   protected getCompensationArgs() {
-      if (!this.compensationArgs) {
-         throw new SagaException('Not set compensation args')
-      }
-
-      return this.compensationArgs
-   }
-
+   abstract compensationArg: T
    abstract invoke(arg: T): Promise<R>
    abstract withCompensation(): Promise<void>
 }

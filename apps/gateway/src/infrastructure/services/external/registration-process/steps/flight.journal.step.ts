@@ -14,24 +14,25 @@ import {
    SagaStep,
    Topic
 } from '@flights.system/shared'
-import { RegistrationProcessService } from '../registration.process.service'
 
 @Injectable()
 class FlightJournalStep
    extends SagaStep<KafkaRequest<AddFlightJournalReq>, string>
    implements OnModuleInit, OnModuleDestroy
 {
+   compensationArg: KafkaRequest<AddFlightJournalReq>
+
    constructor(
       @Inject(InjectServices.ProducerService)
       private readonly producer: IProducerService,
-      @Inject(RegistrationProcessService.name)
+      @Inject(FlightJournalStep.name)
       private readonly logger: MyLoggerService
    ) {
       super('flight-journal-step')
    }
 
    async invoke(arg: KafkaRequest<AddFlightJournalReq>): Promise<string> {
-      this.setCompensationArgs(arg)
+      this.compensationArg = arg
       this.logger.log(`${this.name} invoke`, { trace: arg.traceId })
 
       const result = await this.producer.produceWithReply<
@@ -40,7 +41,6 @@ class FlightJournalStep
       >(Topic.FLIGHT_JOURNAL, arg)
 
       if (result.data.state === 'error') {
-         this.logger.warn(result.data.message)
          throw new SagaException(result.data.message)
       }
 
@@ -48,12 +48,13 @@ class FlightJournalStep
    }
 
    async withCompensation(): Promise<void> {
-      const arg = this.getCompensationArgs()
-      this.logger.log(`${this.name} withCompensation`, { trace: arg.traceId })
+      this.logger.log(`${this.name} withCompensation`, {
+         trace: this.compensationArg.traceId
+      })
 
       await this.producer.produce<AddFlightJournalReq>(
          Topic.FLIGHT_JOURNAL_COMPENSATION,
-         arg
+         this.compensationArg
       )
    }
 

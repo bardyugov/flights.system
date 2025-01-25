@@ -11,8 +11,4 @@ class RegisterOnFlightCmd extends RegisterOnFlightReq {
    }
 }
 
-class MessageResult {
-   constructor(readonly message: string) {}
-}
-
-export { RegisterOnFlightCmd, MessageResult }
+export { RegisterOnFlightCmd }

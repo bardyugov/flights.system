@@ -1,11 +1,11 @@
-import { Injectable, Provider } from '@nestjs/common'
+import { Inject, Injectable, Provider } from '@nestjs/common'
 import { IRegistrationProcessService } from '../../../../application/services/registration.process.service'
 import { FlightJournalStep } from './steps/flight.journal.step'
 import { PaymentStep } from './steps/payment.step'
 import { PlaceReservationStep } from './steps/place.reservation.step'
 import {
    InjectServices,
-   KafkaRequest,
+   MyLoggerService,
    PaymentRes,
    SagaStep
 } from '@flights.system/shared'
@@ -13,21 +13,23 @@ import { RegisterOnFlightCmd } from '@flights.system/shared'
 
 @Injectable()
 class RegistrationProcessService implements IRegistrationProcessService {
-   private successfulStep: SagaStep[]
+   private successfulStep: SagaStep[] = []
 
    constructor(
       private readonly flightJournalStep: FlightJournalStep,
       private readonly paymentStep: PaymentStep,
-      private readonly placeReservationStep: PlaceReservationStep
+      private readonly placeReservationStep: PlaceReservationStep,
+      @Inject(RegistrationProcessService.name)
+      private readonly logger: MyLoggerService
    ) {}
 
-   async register(req: KafkaRequest<RegisterOnFlightCmd>): Promise<PaymentRes> {
+   async register(req: RegisterOnFlightCmd): Promise<PaymentRes> {
       try {
          const { flightId } = await this.placeReservationStep.invoke({
             traceId: req.traceId,
             data: {
-               from: req.data.from,
-               to: req.data.to
+               from: req.from,
+               to: req.to
             }
          })
          this.successfulStep.push(this.placeReservationStep)
@@ -36,7 +38,7 @@ class RegistrationProcessService implements IRegistrationProcessService {
             traceId: req.traceId,
             data: {
                flightId: flightId,
-               clientId: req.data.clientId
+               clientId: req.clientId
             }
          })
 
@@ -45,7 +47,7 @@ class RegistrationProcessService implements IRegistrationProcessService {
          const paymentResult = await this.paymentStep.invoke({
             traceId: req.traceId,
             data: {
-               clientId: req.data.clientId,
+               clientId: req.clientId,
                flightId: flightId
             }
          })
@@ -54,11 +56,10 @@ class RegistrationProcessService implements IRegistrationProcessService {
 
          return paymentResult
       } catch (e) {
+         this.logger.error(e, { trace: req.traceId })
          for (const step of this.successfulStep) {
             await step.withCompensation()
          }
-
-         throw e
       }
    }
 }

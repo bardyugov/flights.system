@@ -4,6 +4,7 @@ import { CityModuleHandler } from '../infrastructure/handlers/city/city.module'
 import { TraceIdMiddleware } from '../infrastructure/common/middlewares/traceId.middleware'
 import { initConfigPath } from '@flights.system/shared'
 import { AuthModuleHandler } from '../infrastructure/handlers/auth/auth.module'
+import { FlightsHandlerModule } from '../infrastructure/handlers/flights/flights.module'
 
 @Global()
 @Module({
@@ -13,7 +14,8 @@ import { AuthModuleHandler } from '../infrastructure/handlers/auth/auth.module'
          envFilePath: initConfigPath()
       }),
       CityModuleHandler,
-      AuthModuleHandler
+      AuthModuleHandler,
+      FlightsHandlerModule
    ]
 })
 class CoreModule implements NestModule {

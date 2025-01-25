@@ -11,13 +11,17 @@ import { MyLoggerModule, ProducerModule } from '@flights.system/shared'
 @Module({
    imports: [
       MyLoggerModule.register(RegistrationProcessService.name),
+      MyLoggerModule.register(FlightJournalStep.name),
+      MyLoggerModule.register(PaymentStep.name),
+      MyLoggerModule.register(PlaceReservationStep.name),
       ProducerModule
    ],
    providers: [
       RegistrationProcessServiceProvider,
       FlightJournalStep,
       PaymentStep,
-      PlaceReservationStep
+      PlaceReservationStep,
+      RegistrationProcessService
    ],
    exports: [RegistrationProcessServiceProvider]
 })

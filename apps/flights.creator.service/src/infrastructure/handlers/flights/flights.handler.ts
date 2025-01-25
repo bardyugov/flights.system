@@ -23,7 +23,7 @@ class FlightsHandler implements OnModuleInit, OnModuleDestroy {
    ) {}
 
    async onModuleInit() {
-      await this.consumer.disconnect()
+      await this.consumer.connect()
 
       await this.consumer.subscribeWithReply<
          ReservationPlaceReq,

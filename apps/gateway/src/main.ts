@@ -5,6 +5,7 @@ import { JWT_AUTH, MyLoggerService } from '@flights.system/shared'
 import { ZodFilter } from './infrastructure/common/filters/zod.filter'
 import { ZodValidationPipe } from 'nestjs-zod'
 import cookieParser from 'cookie-parser'
+import { HttpExceptionFilter } from './infrastructure/common/filters/http.exception.filter'
 
 function configureSwagger() {
    return new DocumentBuilder()
@@ -36,7 +37,7 @@ async function bootstrap() {
 
    app.setGlobalPrefix(globalPrefix)
    app.useGlobalPipes(new ZodValidationPipe())
-   app.useGlobalFilters(new ZodFilter())
+   app.useGlobalFilters(new ZodFilter(), new HttpExceptionFilter())
    app.use(cookieParser())
 
    const port = process.env.PORT
