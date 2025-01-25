@@ -5,7 +5,7 @@ import {
    OnModuleInit
 } from '@nestjs/common'
 import {
-   AddFlightJournalCmd,
+   AddFlightJournalReq,
    IConsumerService,
    InjectServices,
    Topic
@@ -24,12 +24,12 @@ class FlightJournalHandler implements OnModuleInit, OnModuleDestroy {
    async onModuleInit() {
       await this.consumer.connect()
 
-      await this.consumer.subscribeWithReply<AddFlightJournalCmd, string>(
+      await this.consumer.subscribeWithReply<AddFlightJournalReq, string>(
          Topic.FLIGHT_JOURNAL,
          async req => await this.flightJournalService.addFlight(req)
       )
 
-      await this.consumer.subscribe<AddFlightJournalCmd>(
+      await this.consumer.subscribe<AddFlightJournalReq>(
          Topic.FLIGHT_JOURNAL_COMPENSATION,
          async req => await this.flightJournalService.compensateAddedFlight(req)
       )

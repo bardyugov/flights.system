@@ -42,7 +42,7 @@ const entities = [
       BcryptService,
       FlightJournalServiceProvider
    ],
-   exports: [AuthServiceProvider]
+   exports: [AuthServiceProvider, FlightJournalServiceProvider]
 })
 class ServicesModule {}
 

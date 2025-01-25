@@ -33,7 +33,7 @@ class PaymentHandler implements OnModuleInit, OnModuleDestroy {
       )
       await this.consumer.subscribe<number>(
          Topic.PAYMENT_COMPENSATION,
-         async req => await this.paymentService.compensate(req)
+         async req => await this.paymentService.compensatePayment(req)
       )
    }
 

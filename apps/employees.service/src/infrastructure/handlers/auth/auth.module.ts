@@ -5,6 +5,6 @@ import { ServicesModule } from '../../services/services.module'
 
 @Module({
    imports: [ConsumerModule, ServicesModule],
-   controllers: [AuthHandler]
+   providers: [AuthHandler]
 })
 export class AuthModuleHandler {}

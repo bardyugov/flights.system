@@ -1,6 +1,6 @@
 import {
-   Controller,
    Inject,
+   Injectable,
    OnModuleDestroy,
    OnModuleInit
 } from '@nestjs/common'
@@ -14,7 +14,7 @@ import {
 } from '@flights.system/shared'
 import { IAuthService } from '../../../application/services/auth.service'
 
-@Controller()
+@Injectable()
 class AuthHandler implements OnModuleInit, OnModuleDestroy {
    constructor(
       @Inject(InjectServices.ConsumerService)
