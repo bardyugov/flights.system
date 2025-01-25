@@ -3,6 +3,7 @@ import { Request } from 'express'
 import { LoggerService } from '@nestjs/common'
 import * as path from 'path'
 import { EmployeeRoles } from '../dtos'
+import { SagaException } from '../common/exceptions/saga.exception'
 
 enum InjectServices {
    ConsumerService = 'IConsumerService',
@@ -11,7 +12,10 @@ enum InjectServices {
    AuthService = 'IAuthService',
    AirplaneService = 'IAirplaneService',
    JwtService = 'IJwtService',
-   PaymentService = 'IPaymentService'
+   PaymentService = 'IPaymentService',
+   FlightsService = 'IFlightsService',
+   FlightJournalService = 'IFlightJournalService',
+   RegistrationProcessService = 'IRegistrationProcessSevice'
 }
 
 type Ok<T> = {
@@ -66,6 +70,26 @@ type JwtPayload = {
 interface RequestTrace extends Request {
    traceId: string
    user: JwtPayload
+}
+
+abstract class SagaStep<T = unknown, R = unknown> {
+   protected compensationArgs: T
+   protected constructor(readonly name: string) {}
+
+   protected setCompensationArgs(value: T) {
+      this.compensationArgs = value
+   }
+
+   protected getCompensationArgs() {
+      if (!this.compensationArgs) {
+         throw new SagaException('Not set compensation args')
+      }
+
+      return this.compensationArgs
+   }
+
+   abstract invoke(arg: T): Promise<R>
+   abstract withCompensation(): Promise<void>
 }
 
 function parseArrayFromConfig(value: string) {
@@ -134,5 +158,6 @@ export {
    initConfigPath,
    ValidationResult,
    JwtPayload,
-   JWT_AUTH
+   JWT_AUTH,
+   SagaStep
 }

@@ -15,6 +15,10 @@ import {
    AirplaneService,
    AirplaneServiceProvider
 } from './external/airplane.service'
+import {
+   FlightServiceProvider,
+   FlightsService
+} from './external/flights.service'
 
 const entities = [
    CityEntity,
@@ -42,14 +46,20 @@ const entities = [
       }),
       MyLoggerModule.register(AccumulatorService.name),
       MyLoggerModule.register(CityService.name),
-      MyLoggerModule.register(AirplaneService.name)
+      MyLoggerModule.register(AirplaneService.name),
+      MyLoggerModule.register(FlightsService.name)
    ],
    providers: [
       CityServiceProvider,
       AirplaneServiceProvider,
+      FlightServiceProvider,
       AccumulatorService
    ],
-   exports: [CityServiceProvider, AirplaneServiceProvider]
+   exports: [
+      CityServiceProvider,
+      AirplaneServiceProvider,
+      FlightServiceProvider
+   ]
 })
 class ServicesModule {}
 

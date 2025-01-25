@@ -26,6 +26,11 @@ const registerEmployeeReqCred = z.object({
    role: employeesRolesCred
 })
 
+const registerClientOnFlightCred = z.object({
+   from: z.string().min(3).max(23),
+   to: z.string().min(3).max(23)
+})
+
 type EmployeeRoles = z.infer<typeof employeesRolesCred>
 
 class CreateCityReq extends createZodDto(createCityReqCred) {
@@ -84,14 +89,30 @@ class RegisterEmployeeReq extends createZodDto(registerEmployeeReqCred) {
    role: EmployeeRoles
 }
 
-type SagaStepType = 'invoke' | 'compensation'
-
 class PaymentReq {
-   constructor(
-      readonly type: SagaStepType,
-      readonly clientId: number,
-      readonly flightId: number
-   ) {}
+   constructor(readonly clientId: number, readonly flightId: number) {}
+}
+
+class ReservationPlaceReq {
+   constructor(readonly from: string, readonly to: string) {}
+}
+
+class RegisterOnFlightReq extends createZodDto(registerClientOnFlightCred) {
+   @ApiProperty({ type: 'string', description: 'City name' })
+   from: string
+
+   @ApiProperty({ type: 'string', description: 'Employee surname' })
+   to: string
+
+   constructor(from: string, to: string) {
+      super()
+      this.from = from
+      this.to = to
+   }
+}
+
+class AddFlightJournalReq {
+   constructor(readonly flightId: number, readonly clientId: number) {}
 }
 
 export {
@@ -99,5 +120,8 @@ export {
    GetCityReq,
    RegisterEmployeeReq,
    EmployeeRoles,
-   PaymentReq
+   PaymentReq,
+   ReservationPlaceReq,
+   AddFlightJournalReq,
+   RegisterOnFlightReq
 }

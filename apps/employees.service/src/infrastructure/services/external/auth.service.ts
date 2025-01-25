@@ -300,6 +300,7 @@ class AuthService implements IAuthService, OnModuleInit, OnModuleDestroy {
 
    async onModuleInit() {
       await this.producer.connect()
+
       await this.producer.subscribeOfReply(Topic.AIRPLANE_GET_REPLY)
    }
 

@@ -22,4 +22,14 @@ class PaymentRes {
    ) {}
 }
 
-export { CreatedCityRes, AuthTokenRes, GetAirplanesRes, PaymentRes }
+class ReservationPlaceRes {
+   constructor(readonly flightId: number) {}
+}
+
+export {
+   CreatedCityRes,
+   AuthTokenRes,
+   GetAirplanesRes,
+   PaymentRes,
+   ReservationPlaceRes
+}

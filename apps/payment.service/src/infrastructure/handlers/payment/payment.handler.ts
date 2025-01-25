@@ -28,7 +28,7 @@ class PaymentHandler implements OnModuleInit, OnModuleDestroy {
       await this.consumer.connect()
 
       await this.consumer.subscribeWithReply<PaymentReq, PaymentRes>(
-         Topic.PAYMENT_INVOKE,
+         Topic.PAYMENT,
          async req => await this.paymentService.pay(req)
       )
       await this.consumer.subscribe<number>(

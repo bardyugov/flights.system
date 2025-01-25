@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { FlightJournalEntity } from './flight.journal.entity'
 
 enum ClientTypeEnum {
    Basic = 'basic',
@@ -49,6 +50,9 @@ class ClientEntity {
 
    @Column({ name: 'refresh_token', nullable: true })
    refreshToken: string
+
+   @OneToMany(() => FlightJournalEntity, entity => entity.client)
+   flightJournalEntity: FlightJournalEntity[]
 }
 
 export { ClientEntity }

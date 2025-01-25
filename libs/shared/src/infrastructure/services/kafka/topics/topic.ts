@@ -20,9 +20,17 @@ enum Topic {
    AIRPLANE_GET = 'airplane.get.topic',
    AIRPLANE_GET_REPLY = 'airplane.get.topic.reply',
 
-   PAYMENT_INVOKE = 'payment.invoke.topic',
-   PAYMENT_INVOKE_REPLY = 'payment.invoke.topic.reply',
-   PAYMENT_COMPENSATION = 'payment.compensation.topic'
+   PAYMENT = 'payment.invoke.topic',
+   PAYMENT_REPLY = 'payment.invoke.topic.reply',
+   PAYMENT_COMPENSATION = 'payment.compensation.topic',
+
+   FLIGHT_RESERVATION_PLACE = 'flight.reservation.place.topic',
+   FLIGHT_RESERVATION_PLACE_REPLY = 'flight.reservation.place.topic.reply',
+   FLIGHT_RESERVATION_PLACE_COMPENSATION = 'flight.reservation.place.compensation.topic',
+
+   FLIGHT_JOURNAL = 'flights.journal.topic',
+   FLIGHT_JOURNAL_REPLY = 'flights.journal.topic.reply',
+   FLIGHT_JOURNAL_COMPENSATION = 'flights.journal.compensation.topic'
 }
 
 export { Topic }

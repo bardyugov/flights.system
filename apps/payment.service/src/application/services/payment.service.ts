@@ -7,7 +7,7 @@ import {
 
 interface IPaymentService {
    pay(req: KafkaRequest<PaymentReq>): Promise<KafkaResult<PaymentRes>>
-   compensate(req: KafkaRequest<number>): Promise<void>
+   compensatePayment(req: KafkaRequest<number>): Promise<void>
 }
 
 export { IPaymentService }

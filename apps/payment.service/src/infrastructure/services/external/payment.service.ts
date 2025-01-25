@@ -54,7 +54,7 @@ class PaymentService implements IPaymentService {
       )
    }
 
-   async compensate(req: KafkaRequest<number>): Promise<void> {
+   async compensatePayment(req: KafkaRequest<number>): Promise<void> {
       await this.paymentRepo
          .createQueryBuilder()
          .delete()

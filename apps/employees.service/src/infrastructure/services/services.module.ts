@@ -13,13 +13,19 @@ import { ClientEntity } from '../entities/client.entity'
 import { AuthService, AuthServiceProvider } from './external/auth.service'
 import { BcryptService } from './internal/bcrypt.service'
 import { QualificationToEmployeeEntity } from '../entities/qualification.to.employee.entity'
+import { FlightJournalEntity } from '../entities/flight.journal.entity'
+import {
+   FlightJournalServiceProvider,
+   FlightsJournalService
+} from './external/flights.journal.service'
 
 const entities = [
    EmployeeEntity,
    EmployeeStatusEntity,
    QualificationEntity,
    ClientEntity,
-   QualificationToEmployeeEntity
+   QualificationToEmployeeEntity,
+   FlightJournalEntity
 ]
 
 @Module({
@@ -28,9 +34,14 @@ const entities = [
       DatabaseModule.register(entities),
       MyJwtModule,
       MyLoggerModule.register(AuthService.name),
+      MyLoggerModule.register(FlightsJournalService.name),
       ProducerModule
    ],
-   providers: [AuthServiceProvider, BcryptService],
+   providers: [
+      AuthServiceProvider,
+      BcryptService,
+      FlightJournalServiceProvider
+   ],
    exports: [AuthServiceProvider]
 })
 class ServicesModule {}
