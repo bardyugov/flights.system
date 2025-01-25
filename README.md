@@ -1,5 +1,6 @@
 ## Stack
 - Typescript
+- Nx
 - Nestjs
 - Typeorm
 - Postgres
